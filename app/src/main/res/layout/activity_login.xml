@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+
+    android:layout_height="match_parent"
+    tools:context="com.baidu.track.ui.activity.LoginActivity">
+    <!--<com.jikexueyuan.jikeuiproject.ui.custom.JKToolBar-->
+        <!--android:id="@+id/login_title"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="56dp"-->
+        <!--android:background="@color/colorPrimary"/>-->
+    <Button
+        android:id="@+id/cancel_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/ic_cancel"
+        />
+    <ImageView
+
+        android:id="@+id/login"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:layout_marginTop="90dp"
+        android:src="@drawable/ic_logo"
+        app:layout_constraintTop_toBottomOf="@id/cancel_button"
+        app:layout_constraintLeft_toLeftOf="@id/cancel_button"
+        app:layout_constraintRight_toRightOf="@id/cancel_button"/>
+
+    <com.baidu.track.ui.custom.BackDelEditText
+        android:id="@+id/input_username"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        app:layout_constraintTop_toBottomOf="@id/login"
+        app:layout_constraintLeft_toLeftOf="@id/login"
+        app:layout_constraintRight_toRightOf="@id/login"
+        android:layout_marginTop="40dp"
+        android:background="@drawable/input_text_bg"
+        android:layout_marginStart="50dp"
+        android:layout_marginEnd="50dp"
+        android:hint="请输入手机号码"
+        android:padding="8dp"
+        android:drawablePadding="8dp"
+        android:textColorHint="@color/colorHintGray"
+        android:textSize="14sp"
+        android:textColor="@color/colorTextGray"
+        android:inputType="text"
+        />
+
+    <com.baidu.track.ui.custom.BackDelEditText
+        android:id="@+id/input_password"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        app:layout_constraintTop_toBottomOf="@id/input_username"
+        app:layout_constraintLeft_toLeftOf="@id/input_username"
+        app:layout_constraintRight_toRightOf="@id/input_username"
+        android:background="@drawable/input_text_bg"
+        android:layout_marginTop="16dp"
+        android:hint="请输入密码"
+        android:padding="8dp"
+        android:drawablePadding="8dp"
+        android:textColorHint="@color/colorHintGray"
+        android:textSize="14sp"
+        android:textColor="@color/colorTextGray"
+        android:inputType="textPassword"
+        />
+
+    <com.dd.processbutton.iml.ActionProcessButton
+        android:id="@+id/btnSignIn"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        app:layout_constraintTop_toBottomOf="@id/input_password"
+        app:layout_constraintLeft_toLeftOf="@id/input_username"
+        app:layout_constraintRight_toRightOf="@id/input_username"
+        android:layout_marginTop="16dp"
+        android:text="登  录"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:pb_colorComplete="@color/blue_pressed"
+        app:pb_colorNormal="@color/colorPrimary"
+        app:pb_colorPressed="@color/colorPrimaryDark"
+        app:pb_colorProgress="@color/purple_progress"
+        app:pb_textComplete="登陆成功"
+        app:pb_textProgress="登录中"
+        app:pb_textError="登录失败"
+        app:pb_colorError="@color/red_error" />
+
+
+
+
+</android.support.constraint.ConstraintLayout>

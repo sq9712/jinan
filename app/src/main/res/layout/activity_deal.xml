@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:xcustom="http://schemas.android.com/apk/res-auto"
+    >
+    <LinearLayout
+        android:id="@+id/jktoolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+      <Button
+          android:id="@+id/cancel_button"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="取消"
+          android:textSize="18dp"
+          android:layout_weight="0.1"
+          android:background="@drawable/button_style"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.9"/>
+        <Button
+            android:id="@+id/publish"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="上报"
+            android:textSize="20dp"
+            android:layout_weight="0.1"
+            android:background="@drawable/button_style"/>
+    </LinearLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/layoutContent"
+        android:layout_below="@+id/jktoolbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <LinearLayout
+            android:id="@+id/buttontConten"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttontContentTitle"
+            android:elevation="5dp"
+            android:orientation="horizontal"
+            android:background="@layout/rectangle">
+            <GridLayout
+                android:id="@+id/GridLayout1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:columnCount="2"
+                android:orientation="horizontal"
+                android:rowCount="6" >
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:textColor="@color/activity_task_text"
+                    android:text="巡查人:"/>
+
+                <TextView
+                    android:id="@+id/peplename"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:singleLine="true"
+                    android:text="XX"
+                    android:textSize="15sp" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:textColor="@color/activity_task_text"
+                    android:text="巡查时间:"/>
+                <TextView
+                    android:id="@+id/nowtime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:text="XX"/>
+                <TextView
+                    android:id="@+id/textTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:textColor="@color/activity_task_text"
+                    android:text="标题:"/>
+                <TextView
+                    android:id="@+id/Title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:text="标题"/>
+                <TextView
+                    android:id="@+id/textDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:textColor="@color/activity_task_text"
+                    android:text="内容:"/>
+                <TextView
+                    android:id="@+id/Details"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:text="有人乱丢垃圾"/>
+
+
+                <TextView
+                    android:id="@+id/txtPlace"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:textColor="@color/activity_task_text"
+                    android:text="巡查地址:"/>
+                <TextView
+                    android:id="@+id/Place"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="15sp"
+                    android:singleLine="true"
+                    android:text="魏家庄111号"/>
+
+            </GridLayout>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/explain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttontConten"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:textColor="@color/black"
+            android:textSize="18dp"
+            android:text="现场情况说明："/>
+        <EditText
+            android:id="@+id/result"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_below="@+id/explain"
+            android:textSize="14sp"
+            android:gravity="left|top"
+            android:background="@layout/rectangle"
+            />
+        <TextView
+            android:id="@+id/now_scene"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="现场取证："
+            android:textColor="@color/black"
+            android:layout_below="@+id/result"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="18dp"/>
+
+        <LinearLayout
+            android:id="@+id/camera_layout"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_below="@+id/now_scene">
+            <!--android:background="@drawable/bg_border_stroke">-->
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            </android.support.v7.widget.RecyclerView>
+
+            <!--<ImageView-->
+                <!--android:id="@+id/camera"-->
+                <!--android:layout_width="80dp"-->
+                <!--android:layout_height="80dp"-->
+                <!--android:layout_marginLeft="30dp"-->
+                <!--android:layout_gravity="center_vertical"-->
+                <!--android:src="@drawable/photo" />-->
+
+
+        </LinearLayout>
+        <!--<ImageView-->
+            <!--android:id="@+id/image"-->
+            <!--android:layout_width="150dp"-->
+            <!--android:layout_height="150dp"-->
+            <!--android:layout_below="@+id/now_scene"-->
+            <!--android:visibility="gone"/>-->
+
+
+    </RelativeLayout>
+
+
+</RelativeLayout>

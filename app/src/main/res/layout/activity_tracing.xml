@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <LinearLayout
+            android:id="@+id/layout_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:orientation="vertical">
+
+        <include layout="@layout/activity_top"></include>
+        <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:cursorVisible="false"
+            android:editable="false"
+            android:textSize="15dp"
+            android:id="@+id/editText"/>
+    </LinearLayout>
+    <com.baidu.mapapi.map.MapView
+            android:id="@+id/tracing_mapView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/layout_top"
+            android:clickable="true"/>
+
+    <com.baidu.track.activity.BottomDrawerLayout
+        android:id="@+id/bottom_drawer_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        >
+        <RelativeLayout
+            android:id="@+id/layout_price_detail"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:visibility="invisible">
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#e0e0e0"
+                />
+            <TextView
+                android:id="@+id/licheng"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60dp"
+                android:layout_marginTop="16dp"
+                android:text="里程:"
+                />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:layout_marginTop="20dp"
+                android:layout_marginLeft="44dp"
+                android:layout_alignLeft="@id/licheng"
+                >
+                <com.baidu.track.utils.LedTextView
+                    android:id="@+id/text_total_distance_detail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:shadowColor="#838683"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="5"
+                    android:textColor="#686B68"
+                    android:text="0米"
+                    android:textSize="15sp" />
+                <!--<TextView-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text=" 米"-->
+                    <!--/>-->
+
+            </LinearLayout>
+            <TextView
+                android:id="@+id/lishi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="180dp"
+                android:layout_marginTop="16dp"
+                android:text="历时："
+                />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="bottom"
+                android:layout_marginLeft="44dp"
+                android:layout_marginTop="20dp"
+                android:layout_alignLeft="@id/lishi"
+                >
+
+                <com.baidu.track.utils.LedTextView
+                    android:id="@+id/main_clock_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:shadowColor="#838683"
+                    android:shadowDx="0"
+                    android:shadowDy="0"
+                    android:shadowRadius="5"
+                    android:text="00时00分00秒"
+                    android:textColor="#686B68"
+                    android:textSize="15sp" />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+
+
+
+        <RelativeLayout
+            android:id="@+id/layout_bottom_bar"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:layout_alignParentBottom="true"
+            android:visibility="visible"
+
+            >
+            <ImageView
+                android:id="@+id/img_spread_out"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="40dp"
+                android:padding="9dp"
+                android:src="@mipmap/shangzhankai_icon"
+                />
+            <LinearLayout
+                android:id="@+id/layout_tracing_bottom"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="50dp"
+                android:layout_centerVertical="true"
+                android:weightSum="3">
+
+                <!--<Button-->
+                    <!--android:id="@+id/btn_trace"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_weight="0.5"-->
+                    <!--android:layout_marginLeft="55dp"-->
+                    <!--android:layout_marginRight="10dp"-->
+                    <!--android:background="@drawable/bg_btn_cancel"-->
+                    <!--android:text="@string/start_trace"-->
+                    <!--android:textColor="@color/layout_title"/>-->
+
+
+                <Button
+                    android:id="@+id/btn_gather"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="55dp"
+                    android:text="@string/start_gather"
+                    android:background="@drawable/bg_btn_cancel"
+                    android:textColor="@color/layout_title"
+                    android:onClick="onTraceControl"/>
+                <Button
+                    android:id="@+id/add"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.7"
+                    android:background="@drawable/ic_add_circle_black_24dp"/>
+
+            </LinearLayout>
+        </RelativeLayout>
+
+
+    </com.baidu.track.activity.BottomDrawerLayout>
+
+</RelativeLayout>

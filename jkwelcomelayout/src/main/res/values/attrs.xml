@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <declare-styleable name="JKAnimateTextView">
+        <attr name="animate_type"/>
+        <attr name="translate_direction"/>
+        <attr name="duration" />
+        <attr name="delay" />
+        <attr name="x_fraction" />
+        <attr name="y_fraction" />
+
+    </declare-styleable>
+
+    <declare-styleable name="JKAnimateImageView" >
+        <attr name="animate_type"/>
+        <attr name="translate_direction"/>
+        <attr name="duration" />
+        <attr name="delay" />
+        <attr name="x_fraction" />
+        <attr name="y_fraction" />
+
+    </declare-styleable>
+
+
+    <attr name="animate_type">
+        <flag name="translate" value="0" />
+        <flag name="alpha" value="1" />
+    </attr>
+    <attr name="translate_direction">
+        <flag name="top" value="0" />
+        <flag name="left" value="1" />
+        <flag name="bottom" value="2" />
+        <flag name="right" value="3" />
+    </attr>
+
+    <attr name="duration" format="integer" />
+    <attr name="delay" format="integer" />
+    <attr name="x_fraction" format="float" />
+    <attr name="y_fraction" format="float" />
+
+
+</resources>

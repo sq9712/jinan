@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layout_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/jktoolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <include layout="@layout/activity_top"></include>
+    </LinearLayout>
+
+    <LinearLayout
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorWhite"
+    android:elevation="1dp"
+        android:layout_below="@+id/jktoolbar"
+    android:orientation="horizontal">
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/iv_user_head"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_centerHorizontal="false"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/boy"
+        android:scaleType="centerCrop"
+        app:civ_border_width="3dp"
+        app:civ_border_color="#CCFFFFFF"/>
+
+    <TextView
+        android:id="@+id/tv_user_name"
+        android:textSize="16sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="30dp"
+        android:layout_toRightOf="@id/iv_user_head"
+        android:layout_centerHorizontal="false"
+        android:text="未登录"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        />
+</LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/nav"
+        android:layout_below="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:background="@color/colorWhite">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:id="@+id/workload"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="0"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                />
+            <Button
+
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="任务量"
+                android:background="@null"
+                android:layout_gravity="center"
+                android:textColor="@color/gray"
+                android:textSize="12dp"
+                />
+        </LinearLayout>
+        <View
+            android:layout_width="1dip"
+            android:layout_height="30dp"
+            android:background="#E7E6E6"
+            android:layout_gravity="center"
+            />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/distance"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="0"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="今日里程"
+                android:background="@null"
+                android:layout_gravity="center"
+                android:textColor="@color/gray"
+                android:textSize="12dp"
+                />
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/nav">
+        <android.support.design.widget.NavigationView
+            android:id="@+id/person_navigation"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:menu="@menu/person_navigation_menu"
+            app:itemBackground="@color/colorWhite"
+            app:itemTextColor="#818181"
+            />
+    </LinearLayout>
+    <Button
+        android:id="@+id/login_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="登录"
+        android:background="@color/red"
+        android:textColor="@color/white"
+        android:layout_below="@+id/body"/>
+
+
+</RelativeLayout>

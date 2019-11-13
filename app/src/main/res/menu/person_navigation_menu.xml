@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group android:id="@+id/person_group2">
+        <item
+            android:id="@+id/person_menu_2"
+            android:title="我的任务"
+            app:actionLayout="@layout/person_menu_action_view"
+            android:icon="@drawable/ic_person_menu01" />
+    </group>
+    <group android:id="@+id/person_group4">
+        <item
+            android:id="@+id/person_menu_4"
+            android:title="轨迹查询"
+            app:actionLayout="@layout/person_menu_action_view"
+            android:icon="@drawable/ic_track" />
+    </group>
+
+
+
+
+</menu>

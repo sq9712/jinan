@@ -1,0 +1,94 @@
+apply plugin: 'com.android.application'
+
+def supportVersion = "28.0.0"
+android {
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
+    defaultConfig {
+        applicationId "com.baidu.track"
+        minSdkVersion 16
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir 'libs'
+        }
+        androidTest.setRoot('tests')
+
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support'
+    })
+    //noinspection GradleCompatible
+    implementation "com.android.support:appcompat-v7:${supportVersion}"
+    implementation "com.android.support:support-v4:${supportVersion}"
+    implementation "com.android.support:design:${supportVersion}"
+    implementation project(':jkwelcomelayout')
+    implementation "com.android.support:support-v4:${supportVersion}"
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.jakewharton:butterknife:8.5.1'
+    implementation 'devlight.io:navigationtabbar:1.2.5'
+    implementation 'com.lai.weavey:loadinglayout:1.3.1'
+    implementation 'com.github.GrenderG:Toasty:1.2.5'
+    implementation 'cn.pedant.sweetalert:library:1.3'
+    implementation 'com.github.frank-zhu:pullzoomview:1.0.0'
+    implementation 'de.hdodenhof:circleimageview:2.1.0'
+    implementation 'com.squareup.picasso:picasso:2.3.2'
+    implementation 'com.nineoldandroids:library:2.4.0'
+    implementation 'com.daimajia.slider:library:1.1.5@aar'
+    implementation 'com.wang.avi:library:2.1.3'
+    testImplementation 'junit:junit:4.12'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    implementation 'com.github.dmytrodanylyk.android-process-button:library:1.0.4'
+    implementation 'com.github.GrenderG:Toasty:1.4.2'
+    //广告轮播
+    implementation 'com.jorge.circleview:circlelibrary:1.1.1'
+    implementation 'org.jbundle.util.osgi.wrapped:org.jbundle.util.osgi.wrapped.org.apache.http.client:4.1.2'
+    implementation 'commons-logging:commons-logging:1.2'
+    implementation files('libs/jcore-android-2.1.2.jar')
+    //图片轮播框架
+    implementation 'com.youth.banner:banner:1.4.10'
+    //glide，比较好的版本，Matisse版本，配合glide3.7.0，因为后面的glide版本没有了asbitmap等方法
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation files('libs/com.baidu.tts_2.3.1.20170808_e39ea89.jar')\
+    //点击图片放大
+    implementation 'com.bm.photoview:library:1.4.1'
+
+    implementation 'com.yanzhenjie:permission:1.0.5'
+
+    //Rxjava
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation 'com.tbruyelle.rxpermissions2:rxpermissions:0.9.4@aar'
+//图片选择
+    implementation 'com.zhihu.android:matisse:0.5.0-alpha4'
+//Logger打印
+    implementation 'com.orhanobut:logger:1.15'
+//recycelerView 适配器
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.14'
+//仿iOS的AlertViewController
+    implementation 'com.bigkoo:alertview:1.0.3'
+
+//图片放大
+    implementation 'com.github.githubwing:DragPhotoView:1.0.1'
+}
