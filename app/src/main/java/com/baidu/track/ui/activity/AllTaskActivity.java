@@ -9,6 +9,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -51,7 +52,7 @@ public class AllTaskActivity extends Activity implements SwipeRefreshLayout.OnRe
         title = findViewById(R.id.tv_activity_title);
         title.setText("任务清单");
         //初始化刷新插件
-        swiper = (SwipeRefreshLayout) findViewById(R.id.swiper);
+        swiper =  findViewById(R.id.swiper);
         swiper.setOnRefreshListener(this);
         swiper.setColorSchemeResources(android.R.color.holo_blue_light,
                 android.R.color.holo_red_light,
@@ -60,7 +61,7 @@ public class AllTaskActivity extends Activity implements SwipeRefreshLayout.OnRe
         datas = new ArrayList<>();
         adapter = new TaskAdapter(mContext,datas);
         //初始化RecyclerView插件
-        recyclerView = (RecyclerView) findViewById(R.id.recycler);
+        recyclerView =  findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
@@ -72,22 +73,23 @@ public class AllTaskActivity extends Activity implements SwipeRefreshLayout.OnRe
             public void itemClick(int position) {
                 Bundle bundle = new Bundle();
                 bundle.putString("id", datas.get(position).gettNo());
-                bundle.putString("title",datas.get(position).getTaskName());
-                bundle.putString("content", datas.get(position).getContent());
-                bundle.putString("imgurl", datas.get(position).getImgUrl());
-                bundle.putString("getimage", datas.get(position).getGetimgUrl());
-                bundle.putString("createTime", datas.get(position).getTime());
-                bundle.putString("lastTime", datas.get(position).getLastTime());
-                bundle.putString("address", datas.get(position).getAddress());
-                bundle.putString("tagname", "lessonfragment");
+                bundle.putString("title",datas.get(position).getTaskName());//标题
+                bundle.putString("content", datas.get(position).getContent());//内容
+                bundle.putStringArrayList("imgurls", datas.get(position).getImgUrl());//图片（两个属性）
+                bundle.putString("createTime", datas.get(position).getTime());//发现时间
+                bundle.putString("lastTime", datas.get(position).getLastTime());//办结时限
+                bundle.putString("address", datas.get(position).getAddress());//地址
+                bundle.putString("information",datas.get(position).getInformation());//处理意见
+                bundle.putString("tagname", "AllTaskActivity");
 
-                if(datas.get(position).getState().equals("0")){
-                    //跳转ReadedLookActivity
+                if(datas.get(position).getState().equals("0") || datas.get(position).getState().equals("3")){
                     Intent intent = new Intent();
                     intent.putExtras(bundle);
                     intent.setClass(mContext, TaskActivity.class);
                     startActivity(intent);
+                    finish();
                 }else{
+                    //跳转ReadedLookActivity
                     Intent intent = new Intent();
                     intent.putExtras(bundle);
                     intent.setClass(mContext, ReadedLookActivity.class);

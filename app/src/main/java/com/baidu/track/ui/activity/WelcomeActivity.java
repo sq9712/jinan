@@ -19,6 +19,10 @@ public class WelcomeActivity extends AppCompatActivity {
         int layoutId = isFirstOpen();
         setContentView(layoutId);
         ButterKnife.bind(this);
+        if ((getIntent().getFlags() & Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT) != 0) {
+            finish();
+            return;
+        }
     }
 
     public int isFirstOpen() {

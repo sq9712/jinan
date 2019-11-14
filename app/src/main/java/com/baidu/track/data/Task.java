@@ -1,5 +1,7 @@
 package com.baidu.track.data;
 
+import java.util.ArrayList;
+
 /**
  * 任务单实体类
  */
@@ -10,24 +12,27 @@ public class Task {
     private String time;//任务时间
     private String lastTime;//任务办结时限
     private String address;//任务地址
-    //'latitude', 'longitude',纬度经度
-    private String latitude;//定位纬度
-    private String longitude;//定位经度
-    private String imgUrl;//图片地址
-    private String getimgUrl;//12345传图片地址
-
+    private ArrayList<String> imgUrl;//图片地址
     private String state;//任务状态
-
-
+    private String information;//处理意见
 
     public Task(){
 
     }
-    public String getImgUrl() {
+
+    public String getInformation() {
+        return information;
+    }
+
+    public void setInformation(String information) {
+        this.information = information;
+    }
+
+    public ArrayList<String> getImgUrl() {
         return imgUrl;
     }
 
-    public void setImgUrl(String imgUrl) {
+    public void setImgUrl(ArrayList<String> imgUrl) {
         this.imgUrl = imgUrl;
     }
 
@@ -79,14 +84,6 @@ public class Task {
         this.taskName = taskName;
     }
 
-    public String getGetimgUrl() {
-        return getimgUrl;
-    }
-
-    public void setGetimgUrl(String getimgUrl) {
-        this.getimgUrl = getimgUrl;
-    }
-
 
     public String getState() {
         return state;
@@ -94,6 +91,10 @@ public class Task {
 
     public void setState(String state) {
         this.state = state;
+    }
+
+    public String toString(){
+        return "TaskName:"+getTaskName()+"ImgUrl:"+String.valueOf(getImgUrl());
     }
 
 }

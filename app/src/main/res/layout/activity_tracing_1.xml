@@ -40,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginTop="20dp"
-            android:textColor="@color/black"
+            android:textColor="@color/white"
             android:textSize="15dp" />
 
         <RelativeLayout
@@ -55,7 +55,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="40dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/black"
+            android:textColor="@color/color_yellow"
             android:text="里程数:" />
 
         <LinearLayout
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="160dp"
             android:layout_marginTop="16dp"
-            android:textColor="@color/black"
+            android:textColor="@color/color_yellow"
             android:text="巡查时长：" />
 
         <LinearLayout

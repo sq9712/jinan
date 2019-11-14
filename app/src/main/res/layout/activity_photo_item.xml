@@ -14,10 +14,9 @@
 
     <ImageView
         android:id="@+id/photo_del"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_gravity="right|top"
-        android:scaleType="center"
         android:src="@mipmap/icon_delete" />
 
 

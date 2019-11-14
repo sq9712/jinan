@@ -9,16 +9,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.baidu.track.R;
@@ -29,6 +33,8 @@ import com.baidu.track.ui.view.CommonProgressDialog;
 import com.baidu.track.utils.Tools;
 import com.yanzhenjie.alertdialog.AlertDialog;
 import com.yanzhenjie.permission.AndPermission;
+import com.yanzhenjie.permission.PermissionNo;
+import com.yanzhenjie.permission.PermissionYes;
 import com.yanzhenjie.permission.Rationale;
 import com.yanzhenjie.permission.RationaleListener;
 
@@ -43,6 +49,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import cn.jpush.android.api.JPushInterface;
@@ -54,21 +61,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private LinearLayout taskHandle,mapTask,mine,ruleAll;
 
+    private TextView versionName;
     public static boolean isForeground = false;
+    private Context context;
 
-    public static String BASE_URL = "http://47.105.75.27";
+    //调用，apkPath 入参就是 xml 中共享的路径
+    private String apkPath;
+
+    //https://www.zhuzones.top
+    //https://www.vorin.net
+    public static String BASE_URL = "https://www.zhuzones.top";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context =this;
         ButterKnife.bind(this);
         initViews();
         // 初始化 JPush。如果已经初始化，但没有登录成功，则执行重新登录。
         JPushInterface.init(getApplicationContext());
         allRequest();
+        apkPath = context.getExternalCacheDir().getPath()+ File.separator+"app"+File.separator;
         // 获取本版本号，是否更新
-//        int vision = Tools.getVersion(this);
-//        getVersion(vision);
+        double vision = Tools.getVersion(this);
+        String version = Tools.getVersionName(this);
+        versionName.setText("版本号："+version);
+        getVersion(vision);
     }
 
     /**
@@ -79,12 +97,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mapTask = findViewById(R.id.mapTask);
         mine = findViewById(R.id.mine);
         ruleAll = findViewById(R.id.ruleAll);
-
+        versionName = findViewById(R.id.versionname);
         taskHandle.setOnClickListener(this);
         mapTask.setOnClickListener(this);
         mine.setOnClickListener(this);
         ruleAll.setOnClickListener(this);
-
     }
 
     @Override
@@ -95,7 +112,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.mapTask:
                 startActivity(new Intent(this, StartAndEndActivity.class));
-
                 break;
             case R.id.mine:
                 startActivity(new Intent(this, PersonActivity.class));
@@ -144,45 +160,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String token = sp.getString("access_token", null);
         if(token==null){
             startActivity(new Intent(this, LoginActivity.class));
+            finish();
             Toast.makeText(this,"请先去登录",Toast.LENGTH_LONG).show();
         }
     }
     Internet internet;
     //接口地址
-    private String url= "https://www.sanhuifr.com/api/version";
-    private String newversion,urL,description;
+    private String url= BASE_URL+"/api/version";
+    private String newversion = "";
+    private String urL,description;
     private CommonProgressDialog pBar;
 
-
-    // 下载存储的文件名
-    private static final String DOWNLOAD_NAME = "channelWe";
-
     // 获取更新版本号
-    private void getVersion(final int vision) {
+    private void getVersion(final double vision) {
         final Thread t1= new Thread(
-                //将服务器上的图片加载到本地
                 new Thread() {
                     @Override
                     public void run() {
                         String result = internet.gethttpresult(url);
-                        try {
-                            JSONObject result_json = new JSONObject(result);
-                            JSONArray person = result_json.getJSONArray("data");
-                            for (int i = 0; i < person.length(); i++) {
-                                JSONObject object = person.getJSONObject(i);
-                                newversion = object.getString("version_number");
-                                urL = object.getString("version_url");//下载地址
-                                description = object.getString("description");//更新说明
+                            try {
+                                JSONObject result_json = new JSONObject(result);
+                                JSONArray person = result_json.getJSONArray("data");
+                                for (int i = 0; i < person.length(); i++) {
+                                    JSONObject object = person.getJSONObject(i);
+                                    newversion = object.getString("version_number");
+                                    urL = object.getString("version_url");//下载地址
+                                    description = object.getString("description");//更新说明
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                                System.out.println(e.toString());
+                                Looper.prepare();
+                                Toast.makeText(MainActivity.this, "文件解析错误！", Toast.LENGTH_SHORT).show();
+                                Looper.loop();
                             }
-                            Log.i("JSON",String.valueOf(person));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            System.out.println(e.toString());
-                            Looper.prepare();
-                            Toast.makeText(MainActivity.this, "文件解析错误！", Toast.LENGTH_SHORT).show();
-                            Looper.loop();
                         }
-                    }
                 });
         t1.start();
         try{
@@ -191,29 +203,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             e.printStackTrace();
         }
 
-        Log.i("urL",urL);
-        Log.i("newversion1",newversion);
-
         String content = description;//更新内容
-
-
-        double newversioncode = Double
-                .parseDouble(newversion);
-        int cc = (int) (newversioncode);
-
-        System.out.println(newversion + "v" + vision + ",,"
-                + cc);
-        if (cc != vision) {
-            if (vision < cc) {
-                System.out.println(newversion + "v"
-                        + vision);
-                // 版本号不同
-                ShowDialog(vision, newversion, content, urL);
+        if(!newversion.equals(""))
+        {
+            double newversioncode = Double
+                    .parseDouble(newversion);
+            if (newversioncode != vision) {
+                if (vision < newversioncode) {
+                    System.out.println(newversion + "v"
+                            + vision);
+                    // 版本号不同
+                    ShowDialog(vision, newversion, content, urL);
+                }
             }
         }
-    }
 
-    // int progressValue = 0;
+    }
 
     /**
      * 升级系统
@@ -221,46 +226,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param content
      * @param url
      */
-    private void ShowDialog(int vision, String newversion, String content,
+    private void ShowDialog(double vision, String newversion, String content,
                             final String url) {
-//        final MaterialDialog dialog = new MaterialDialog(this);//自定义的对话框，可以呀alertdialog
-//        dialog.content(content).btnText("取消", "更新").title("版本更新 ")
-//                .titleTextSize(15f).show();
-//        dialog.setCanceledOnTouchOutside(false);
-//        dialog.setOnBtnClickL(new OnBtnClickL() {// left btn click listener
-//            @Override
-//            public void onBtnClick() {
-//                dialog.dismiss();
-//            }
-//        }, new OnBtnClickL() {// right btn click listener
-//
-//            @Override
-//            public void onBtnClick() {
-//                dialog.dismiss();
-//                // pBar = new ProgressDialog(MainActivity.this,
-//                // R.style.dialog);
-//                pBar = new CommonProgressDialog(MainActivity.this);
-//                pBar.setCanceledOnTouchOutside(false);
-//                pBar.setTitle("正在下载");
-//                pBar.setCustomTitle(LayoutInflater.from(
-//                        MainActivity.this).inflate(
-//                        R.layout.title_dialog, null));
-//                pBar.setMessage("正在下载");
-//                pBar.setIndeterminate(true);
-//                pBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-//                pBar.setCancelable(true);
-//                // downFile(URLData.DOWNLOAD_URL);
-//                final DownloadTask downloadTask = new DownloadTask(
-//                        MainActivity.this);
-//                downloadTask.execute(url);
-//                pBar.setOnCancelListener(new DialogInterface.OnCancelListener() {
-//                    @Override
-//                    public void onCancel(DialogInterface dialog) {
-//                        downloadTask.cancel(true);
-//                    }
-//                });
-//            }
-//        });
+
 
         new android.app.AlertDialog.Builder(this)
                 .setTitle("版本更新")
@@ -338,8 +306,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int fileLength = connection.getContentLength();
                 if (Environment.getExternalStorageState().equals(
                         Environment.MEDIA_MOUNTED)) {
-                    file = new File(Environment.getExternalStorageDirectory(),
-                            DOWNLOAD_NAME);
+                    file = new File(apkPath + "TEST.apk");
 
                     if (!file.exists()) {
                         // 判断父文件夹是否存在
@@ -416,20 +383,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             pBar.dismiss();
             if (result != null) {
 
-//                // 申请多个权限。大神的界面
-//                AndPermission.with(MainActivity.this)
-//                        .requestCode(REQUEST_CODE_PERMISSION_OTHER)
-//                        .permission(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-//                        // rationale作用是：用户拒绝一次权限，再次申请时先征求用户同意，再打开授权对话框，避免用户勾选不再提示。
-//                        .rationale(new RationaleListener() {
-//                                       @Override
-//                                       public void showRequestPermissionRationale(int requestCode, Rationale rationale) {
-//                                           // 这里的对话框可以自定义，只要调用rationale.resume()就可以继续申请。
-//                                           AndPermission.rationaleDialog(MainActivity.this, rationale).show();
-//                                       }
-//                                   }
-//                        )
-//                        .send();
                 // 申请多个权限。
                 AndPermission.with(MainActivity.this)
                         .requestCode(REQUEST_CODE_PERMISSION_SD)
@@ -442,10 +395,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 Toast.makeText(context, "您未打开SD卡权限" + result, Toast.LENGTH_LONG).show();
             } else {
-                // Toast.makeText(context, "File downloaded",
-                // Toast.LENGTH_SHORT)
-                // .show();
-                update();
+
+                installApk(context,apkPath);
             }
 
         }
@@ -509,14 +460,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
+    /**
+     * 安装apk
+     */
+    public static void installApk(Context context,String apkPath) {
+        if (TextUtils.isEmpty(apkPath)){
+            Toast.makeText(context,"更新失败！未找到安装包", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
+        File apkFile = new File(apkPath + "TEST.apk");
 
-    private void update() {
-        //安装应用
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(Uri.fromFile(new File(Environment
-                        .getExternalStorageDirectory(), DOWNLOAD_NAME)),
-                "application/vnd.android.package-archive");
-        startActivity(intent);
+        Intent intent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        //Android 7.0 系统共享文件需要通过 FileProvider 添加临时权限，否则系统会抛出 FileUriExposedException .
+        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.N){
+            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Uri contentUri = FileProvider.getUriForFile(context,"com.baidu.track.fileprovider",apkFile);
+            intent.setDataAndType(contentUri,"application/vnd.android.package-archive");
+        }else {
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setDataAndType(
+                    Uri.fromFile(apkFile),
+                    "application/vnd.android.package-archive");
+        }
+        context.startActivity(intent);
     }
 }

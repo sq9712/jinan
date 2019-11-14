@@ -1,9 +1,11 @@
 package com.baidu.track.activity;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -31,11 +33,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.trace.api.entity.OnEntityListener;
@@ -49,7 +49,6 @@ import com.baidu.trace.api.track.OnTrackListener;
 import com.baidu.trace.api.track.SupplementMode;
 import com.baidu.trace.api.track.TrackPoint;
 import com.baidu.trace.model.CoordType;
-import com.baidu.trace.model.LocationMode;
 import com.baidu.trace.model.OnTraceListener;
 import com.baidu.trace.model.ProcessOption;
 import com.baidu.trace.model.PushMessage;
@@ -60,187 +59,97 @@ import com.baidu.trace.model.TransportMode;
 import com.baidu.track.R;
 import com.baidu.track.TrackApplication;
 import com.baidu.track.api.JSONParser;
-
 import com.baidu.track.model.CurrentLocation;
 import com.baidu.track.ui.activity.DealActivity;
 import com.baidu.track.utils.BitmapUtil;
 import com.baidu.track.utils.CommonUtil;
 import com.baidu.track.utils.Constants;
+import com.baidu.track.utils.LedTextView;
 import com.baidu.track.utils.MapUtil;
 import com.baidu.track.utils.MixSpeakUtil;
 import com.baidu.track.utils.SharedPreferencesUtils;
 import com.baidu.track.utils.TakePhotoButton;
 import com.baidu.track.utils.TrackReceiver;
 import com.baidu.track.utils.ViewUtil;
-
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-
 import static com.baidu.track.ui.activity.MainActivity.BASE_URL;
-
 /**
  * 巡查界面
  */
 public class StartAndEndActivity extends Activity implements View.OnClickListener, SensorEventListener {
-
     private String url = BASE_URL+"/api/startAndEndPatrol";
-
     private TrackApplication trackApp = null;
-
     private ViewUtil viewUtil = null;
-
-
-    private Button gatherBtn = null;
-
     private PowerManager powerManager = null;
-
     private PowerManager.WakeLock wakeLock = null;
-
     private TrackReceiver trackReceiver = null;
-
     private SensorManager mSensorManager;
-
     private Double lastX = 0.0;
-
     private int mCurrentDirection = 0;
-
     private LinearLayout addBtn = null;
-
     private LinearLayout backBtn = null;
-    /**
-     * 地图工具
-     */
-    private MapUtil mapUtil = null;
-
-    /**
-     * 轨迹服务监听器
-     */
-    private OnTraceListener traceListener = null;
-
-    /**
-     * 轨迹监听器(用于接收纠偏后实时位置回调)
-     */
-    private OnTrackListener trackListener = null;
-
-    /**
-     * Entity监听器(用于接收实时定位回调)
-     */
-    private OnEntityListener entityListener = null;
-
-    /**
-     * 实时定位任务
-     */
-    private RealTimeHandler realTimeHandler = new RealTimeHandler();
-
+    private MapUtil mapUtil = null;//地图工具
+    private OnTraceListener traceListener = null;//轨迹服务监听器
+    private OnTrackListener trackListener = null;//轨迹监听器(用于接收纠偏后实时位置回调)
+    private OnEntityListener entityListener = null;//Entity监听器(用于接收实时定位回调)
+    private RealTimeHandler realTimeHandler = new RealTimeHandler();//实时定位任务
     private RealTimeLocRunnable realTimeLocRunnable = null;
-
-    /**
-     * 打包周期
-     */
-    public int packInterval = Constants.DEFAULT_PACK_INTERVAL;
-
-    /**
-     * 轨迹点集合
-     */
-    private List<LatLng> trackPoints;
-
+    public int packInterval = Constants.DEFAULT_PACK_INTERVAL;//打包周期
+    private List<LatLng> trackPoints;//轨迹点集合
     private boolean firstLocate = true;
-    /**
-     * 是否为第一次开启服务
-     */
-    private boolean firstTrace;
-
     private String id = null;
-    /**
-     * 开始采集时间
-     */
-    private long Time;
-    /**
-     * 查询历史轨迹开始时间
-     */
-    public long beginTime;
-
-    /**
-     * 查询历史轨迹结束时间
-     */
-    public long endTime = CommonUtil.getCurrentTime();
-
+    private long Time;//开始采集时间
+    public long beginTime;//查询历史轨迹开始时间
+    public long endTime = CommonUtil.getCurrentTime();//查询历史轨迹结束时间
     private HistoryTrackRequest historyTrackRequest;
-
     private int pageIndex = 1;
-    //百度语音
-    private MixSpeakUtil mixSpeakUtil;
-    //GPS卫星
-    private LocationManager locationManager;
+    private MixSpeakUtil mixSpeakUtil;//百度语音
+    private LocationManager locationManager;//GPS卫星
     private String provider;
-    private float signalCont;
     private String TAG = "GPS";
-
     private TextView  editText;
-
-    //电子时钟
-    private TextView mTextView;
-
-    /**
-     * 判断是补偿还是实时
-     */
-    private Boolean addOrRealtime;
-
-    /**
-     * 记录卫星个数
-     */
-    private  int counts = 0;
-
-    /**
-     *
-     */
-    private TextView textdistance;
-
-
-
+    private TextView mTextView;//电子时钟
+    private Boolean addOrRealtime;//判断是补偿还是实时
+    private  int counts = 0;//记录卫星个数
+    private TextView textdistance;//里程
+    private TakePhotoButton button;//长按按钮
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracing_1);
         //语音
         mixSpeakUtil=MixSpeakUtil.getInstance(this);
-
         BitmapUtil.init();
         setTitle(R.string.tracing_title);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);//监听卫星信号强度locationManager.addGpsStatusListener(statusListener)
         setOnClickListener(this);
         init();
-
         startGatherButton();
-       // textcircle();
-       // setCircleBar();
-////创建Alarm并启动
-//        Intent intent = new Intent("LOCATION_CLOCK");
-//        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
-//        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
-//// 每五秒唤醒一次
-//        Context context=this;
-//        long second = 15 * 1000;
-//        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), second, pendingIntent);
-//        if (powerManager == null) {
-//            //针对熄屏后cpu休眠导致的无法联网、定位失败问题,通过定期点亮屏幕实现联网,本操作会导致cpu无法休眠耗电量增加,谨慎使用
-//            powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-//            PowerManager.WakeLock wl=powerManager
-//                    .newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP |PowerManager.SCREEN_DIM_WAKE_LOCK, "bright");
-//            wl.acquire();
-//            //点亮屏幕
-//            wl.release();
-//            //释放
-//        }
+        //创建Alarm并启动
+        Intent intent = new Intent("LOCATION_CLOCK");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+        // 每五秒唤醒一次
+        Context context=this;
+        long second = 15 * 1000;
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), second, pendingIntent);
+        if (powerManager == null) {
+            //针对熄屏后cpu休眠导致的无法联网、定位失败问题,通过定期点亮屏幕实现联网,本操作会导致cpu无法休眠耗电量增加,谨慎使用
+            powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            PowerManager.WakeLock wl=powerManager
+                    .newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP |PowerManager.SCREEN_DIM_WAKE_LOCK, "bright");
+            wl.acquire();
+            //点亮屏幕
+            wl.release();
+            //释放
+        }
     }
-
     /**
      * 设置点击监听器
      */
@@ -248,10 +157,8 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         LinearLayout optionsButton = (LinearLayout) findViewById(R.id.btn_activity_options);
         optionsButton.setOnClickListener(listener);
     }
-
     private void init() {
         initListener();
-
         trackApp = (TrackApplication) getApplicationContext();
         viewUtil = new ViewUtil();
         mapUtil = MapUtil.getInstance();
@@ -259,156 +166,16 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         mapUtil.setCenter(mCurrentDirection);//设置地图中心点
         powerManager = (PowerManager) trackApp.getSystemService(Context.POWER_SERVICE);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);// 获取传感器管理服务
-
-
-        //gatherBtn = (Button) findViewById(R.id.btn_gather);
         addBtn = findViewById(R.id.add);
         backBtn = findViewById(R.id.btn_activity_back);
-
         textdistance=(TextView)findViewById(R.id.text_total_distance_detail);
         editText=(TextView)findViewById(R.id.editText);
-
         mTextView = (TextView) findViewById(R.id.main_clock_time);
-
-        //gatherBtn.setOnClickListener(this);
         addBtn.setOnClickListener(this);
         backBtn.setOnClickListener(this);
-
-
-//        gatherBtn.setOnLongClickListener(new View.OnLongClickListener(){
-//            @Override
-//            public boolean onLongClick(View v) {
-//                //Toast.makeText(StartAndEndActivity.this, "长按事件", Toast.LENGTH_SHORT).show();
-//                if (trackApp.isGatherStarted) {
-//                    //停止采集
-//                    mixSpeakUtil.speak("停止采集");
-//                    trackApp.mClient.stopGather(traceListener);
-//                } else {
-//                    //开始采集
-//                    mixSpeakUtil.speak("开始采集");
-//                    trackApp.mClient.setInterval(Constants.DEFAULT_GATHER_INTERVAL, packInterval);
-//                    trackApp.mClient.startGather(traceListener);//开启采集
-//                    Time = CommonUtil.getCurrentTime();
-//                    SharedPreferencesUtils.setParam(StartAndEndActivity.this, "Time", Time);
-//                }
-//                return false;
-//            }
-//        });
-//        gatherBtn.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                if (trackApp.isGatherStarted) {
-//                    //停止采集
-//                    Toast.makeText(StartAndEndActivity.this, "长按结束", Toast.LENGTH_SHORT).show();
-//                } else {
-//                    //开始采集
-//                    Toast.makeText(StartAndEndActivity.this, "长按开始", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-
-//        gatherBtn.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-//                    downTime = System.currentTimeMillis();
-//                    onBtnTouch = true;
-//                    Thread t= new Thread() {
-//                        @Override
-//                        public void run() {
-//                            while (onBtnTouch) {
-//                                thisTime = System.currentTimeMillis();
-//                                if (thisTime - downTime == 500) {
-//                                    if (trackApp.isGatherStarted) {
-//                                        //停止采集
-//
-//                                        trackApp.mClient.stopTrace(trackApp.mTrace, null);
-//                                        trackApp.mClient.stopGather(traceListener);
-//                                        Looper.prepare();
-//                                        Toast.makeText(StartAndEndActivity.this, "关闭服务中，请稍后...", Toast.LENGTH_LONG).show();
-//                                        Looper.loop();
-//                                    }
-//                                    else {
-//                                        //开始采集
-//                                        if (!isOpenProvider()) {
-//                                            Looper.prepare();
-//                                            Toast.makeText(StartAndEndActivity.this, "请检查网络或GPS是否打开", Toast.LENGTH_LONG).show();
-//                                            Looper.loop();
-//                                        }
-//
-//                                            trackApp.mClient.startTrace(trackApp.mTrace, traceListener);//开始服务
-//                                        new Thread() {
-//                                            @Override
-//                                            public void run() {
-//                                                super.run();
-//                                                try {
-//                                                    Thread.sleep(3000);//休眠3秒
-//
-//                                                    trackApp.mClient.setInterval(Constants.DEFAULT_GATHER_INTERVAL, packInterval);
-//                                                    trackApp.mClient.startGather(traceListener);//开启采集
-//                                                    Time = CommonUtil.getCurrentTime();
-//                                                    SharedPreferencesUtils.setParam(StartAndEndActivity.this, "Time", Time);
-//
-//                                                } catch (InterruptedException e) {
-//                                                    e.printStackTrace();
-//                                                }
-//
-//                                            }
-//
-//                                        }.start();
-//
-//
-//
-//                                    }
-//
-//                                }
-//                            }
-//                        }
-//                    };
-//                    t.start();
-//
-//                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-//                    onBtnTouch = false;
-//                    if (thisTime - downTime < 500) {
-//                        if (trackApp.isGatherStarted) {
-//                            //停止采集
-//                            Toast.makeText(StartAndEndActivity.this, "长按结束", Toast.LENGTH_SHORT).show();
-//                        } else {
-//                            //开始采集
-//                            Toast.makeText(StartAndEndActivity.this, "长按开始", Toast.LENGTH_SHORT).show();
-//                        }
-//                    }
-//                } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
-//                    onBtnTouch = false;
-//                }
-//                return false;
-//            }
-//        });
-
-
-        //setGatherBtnStyle();
-
-        trackPoints = new ArrayList<>();
-
-//        trackApp.mClient.startTrace(trackApp.mTrace, traceListener);//开始服务
-
         addOrRealtime=false;
 
     }
-    long downTime = 0;//Button被按下时的时间
-    long thisTime = 0;//while每次循环时的时间
-    boolean onBtnTouch = false;//Button是否被按下
-//    int tvValue = 0;//TextView中的值
-//
-//    TextView textView;
-//    private Handler handler = new Handler() {
-//        @Override
-//        public void handleMessage(Message msg) {
-//            super.handleMessage(msg);
-//          //  textView.setText(String.valueOf(msg.arg1));
-//        }
-//    };
-
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         //每次方向改变，重新给地图设置定位数据，用上一次的经纬度
@@ -420,14 +187,10 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
             }
         }
         lastX = x;
-
     }
-
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
-
     }
-
     /**
      * 结束巡逻，上传结束时间
      */
@@ -456,18 +219,15 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
             e.printStackTrace();
         }
     }
-
     /**
      * 开始巡逻，上传开始时间
      */
     private void StartTimePost(){
-
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");// HH:mm:ss
         // 获取当前时间
         Date date = new Date(System.currentTimeMillis());
         String startTime = simpleDateFormat.format(date);
         JSONObject alljson = new JSONObject();
-
         try{
             alljson.put("start_time",startTime);
             String str = JSONParser.post(alljson,url, JSONParser.getInfo(this));
@@ -495,24 +255,10 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         switch (view.getId()) {
             // 追踪选项设置
             case R.id.btn_activity_options:
-                ViewUtil.startActivityForResult(this, TracingOptionsActivity.class, Constants
-                        .REQUEST_CODE);
+//                ViewUtil.startActivityForResult(this, RecordActivity.class, Constants.REQUEST_CODE);
+//               ViewUtil.startActivityForResult(this, TracingOptionsActivity.class, Constants
+//                        .REQUEST_CODE);
                 break;
-            //case R.id.btn_gather:
-//                if (trackApp.isGatherStarted) {
-//                    //停止采集
-//                    mixSpeakUtil.speak("停止采集");
-//                    trackApp.mClient.stopGather(traceListener);
-//                } else {
-//                    //开始采集
-//                    mixSpeakUtil.speak("开始采集");
-//                    trackApp.mClient.setInterval(Constants.DEFAULT_GATHER_INTERVAL, packInterval);
-//                    trackApp.mClient.startGather(traceListener);//开启采集
-//                    Time = CommonUtil.getCurrentTime();
-//                    SharedPreferencesUtils.setParam(this, "Time", Time);
-//                }
-
-               // break;
             case R.id.add:
                 Intent intent = new Intent(this, DealActivity.class);
                 intent.putExtra("case",1);
@@ -539,7 +285,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
             default:
                 break;
         }
-
     }
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -564,104 +309,48 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         return false;
     }
     /**
-     * 设置采集按钮样式
-     */
-//    private void setGatherBtnStyle() {
-//        boolean isGatherStarted = trackApp.trackConf.getBoolean("is_gather_started", false);
-//        if (isGatherStarted) {
-//            gatherBtn.setText(R.string.stop_gather);
-//            gatherBtn.setTextColor(ResourcesCompat.getColor(getResources(), R.color.white, null));
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                gatherBtn.setBackground(ResourcesCompat.getDrawable(getResources(),
-//                        R.drawable.stop_gather_shape, null));
-//            } else {
-//                gatherBtn.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(),
-//                        R.drawable.stop_gather_shape, null));
-//            }
-//        } else {
-//            gatherBtn.setText(R.string.start_gather);
-//            gatherBtn.setTextColor(ResourcesCompat.getColor(getResources(), R.color.layout_title, null));
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                gatherBtn.setBackground(ResourcesCompat.getDrawable(getResources(),
-//                        R.drawable.start_gather_shape, null));
-//            } else {
-//                gatherBtn.setBackgroundDrawable(ResourcesCompat.getDrawable(getResources(),
-//                        R.drawable.start_gather_shape, null));
-//            }
-//        }
-//    }
-
-    /**
      * 实时定位任务
      */
     class RealTimeLocRunnable implements Runnable {
-
         private int interval = 0;
-
         public RealTimeLocRunnable(int interval) {
             this.interval = interval;
         }
-
         @Override
         public void run() {
             trackApp.getCurrentLocation(entityListener, trackListener);
             realTimeHandler.postDelayed(this, interval * 1000);
         }
     }
-
     public void startRealTimeLoc(int interval) {
         realTimeLocRunnable = new RealTimeLocRunnable(interval);
         realTimeHandler.post(realTimeLocRunnable);
     }
-
     public void stopRealTimeLoc() {
         if (null != realTimeHandler && null != realTimeLocRunnable) {
             realTimeHandler.removeCallbacks(realTimeLocRunnable);
         }
         trackApp.mClient.stopRealTimeLoc();
     }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (null == data) {
-            return;
-        }
-
-        if (data.hasExtra("locationMode")) {
-            LocationMode locationMode = LocationMode.valueOf(data.getStringExtra("locationMode"));
-            trackApp.mClient.setLocationMode(locationMode);//定位模式
-        }
-        trackApp.mTrace.setNeedObjectStorage(false);
-
-        if (data.hasExtra("gatherInterval") && data.hasExtra("packInterval")) {
-            int gatherInterval = data.getIntExtra("gatherInterval", Constants.DEFAULT_GATHER_INTERVAL);
-            int packInterval = data.getIntExtra("packInterval", Constants.DEFAULT_PACK_INTERVAL);
-            StartAndEndActivity.this.packInterval = packInterval;
-            trackApp.mClient.setInterval(gatherInterval, packInterval);//设置频率
-        }
-
-    }
     /**
      * 回调的监听
      */
     private void initListener() {
-
+        trackPoints = new ArrayList<>();
         trackListener = new OnTrackListener() {
-
             @Override
             public void onLatestPointCallback(LatestPointResponse response) {
                 //经过服务端纠偏后的最新的一个位置点，回调
+                Log.i("接口调用","onLatestPointCallback");
                 try {
                     if (StatusCodes.SUCCESS != response.getStatus()) {
                         return;
                     }
-
                     LatestPoint point = response.getLatestPoint();
-                    if (null == point || CommonUtil.isZeroPoint(point.getLocation().getLatitude(), point.getLocation()
-                            .getLongitude())) {
+                    if (null == point || CommonUtil.isZeroPoint(point.getLocation().getLatitude(), point.getLocation().getLongitude()))
+                    {
                         return;
                     }
-
                     LatLng currentLatLng = mapUtil.convertTrace2Map(point.getLocation());
                     if (null == currentLatLng) {
                         return;
@@ -675,60 +364,54 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                         firstLocate = false;
                         mixSpeakUtil.speak("起点获取中，请稍后...");
                         Toast.makeText(StartAndEndActivity.this,"起点获取中，请稍后...",Toast.LENGTH_SHORT).show();
-                        trackPoints.add(currentLatLng);
-                       // mapUtil.drawHistoryTrack(trackPoints, false, mCurrentDirection);//实时动态的画出运动轨迹
+//                        trackPoints = new ArrayList<>();
+//                        trackPoints.add(mapUtil.convertTrace2Map(point.getLocation()));
+//                        mapUtil.drawHistoryTrack(trackPoints, false, 0);//画轨迹
                         return;
                     }
-
-
                     if (trackPoints == null) {
                         return;
                     }
-//                    trackPoints.add(currentLatLng);
-
                     endTime = CommonUtil.getCurrentTime();
                     beginTime=endTime-15;
-
                     Time = SharedPreferencesUtils.getParam(StartAndEndActivity.this, "Time", 0L);
                     String DATE_FORMAT1 = "%02d时%02d分%02d秒";
-
-                    System.out.println(Time+"和"+endTime);
                     long count=endTime-Time;
-
-                    // count=count/1000;//总秒数
                     int s= (int) (count%60);//秒
                     int m= (int) (count/60);//分
                     int h=(int) (count/3600);//时
 
-                    mTextView.setText(String.format(DATE_FORMAT1,h,m,s));
+                    String speak="你现在已经连续巡查"+m+"分钟了，请注意休息！或者关闭采集";
+
+                    int alarm=m%5;
+                    if(m>=30&&alarm==0)
+                    {
+                        mixSpeakUtil.speak(speak);
+                    }
+                    count=count*1000-8*60*60*1000;;//总秒数
+                    //mTextView.setText(String.format(DATE_FORMAT1,h,m,s));
+                    mTextView.setText(CommonUtil.getHMS(count));
                     if (addOrRealtime)
                     {
-                        //trackPoints.add(currentLatLng);
                         long groundTime=SharedPreferencesUtils.getParam(StartAndEndActivity.this, "groundTime", 0L);
                         long frontTime = SharedPreferencesUtils.getParam(StartAndEndActivity.this, "frontTime", 0L);
                         queryHistoryTrack(groundTime,frontTime);
                         Log.e("绘制轨迹", "补偿路线");
                     }else {
-                        //trackPoints.add(currentLatLng);
                         queryHistoryTrack();
                         Log.e("绘制轨迹", "实时路线");
                     }
-
-                      //queryHistoryTrack();
-                 // mapUtil.drawHistoryTrack(trackPoints, false, mCurrentDirection);//实时动态的画出运动轨迹
                 } catch (Exception x) {
-
                 }
             }
             @Override
-
             public void onHistoryTrackCallback(HistoryTrackResponse response) {
                 try {
                     int total = response.getTotal();
                     if (StatusCodes.SUCCESS != response.getStatus()) {
                         viewUtil.showToast(StartAndEndActivity.this, response.getMessage());
                     } else if (0 == total) {
-                        // viewUtil.showToast(StartAndEndActivity.this, getString(R.string.no_track_data));
+                        // viewUtil.showToast(StartAndEndActivity1.this, getString(R.string.no_track_data));
                     } else {
                         List<TrackPoint> points = response.getTrackPoints();
                         if (null != points) {
@@ -736,12 +419,10 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                                 if (!CommonUtil.isZeroPoint(trackPoint.getLocation().getLatitude(),
                                         trackPoint.getLocation().getLongitude())) {
                                     trackPoints.add(MapUtil.convertTrace2Map(trackPoint.getLocation()));
-                                    //viewUtil.showToast(StartAndEndActivity.this,"轨迹：" + trackPoints.size());
                                 }
                             }
                         }
                     }
-
                     //查找下一页数据
                     if (total > Constants.PAGE_SIZE * pageIndex) {
                         historyTrackRequest.setPageIndex(++pageIndex);
@@ -755,8 +436,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                         }
                     } else {
                         mapUtil.drawHistoryTrack(trackPoints, false, mCurrentDirection);//画轨迹
-                        // queryDistance();// 查询里程
-
                         if (addOrRealtime)
                         {
                             long groundTime=SharedPreferencesUtils.getParam(StartAndEndActivity.this, "groundTime", 0L);
@@ -767,20 +446,15 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                             queryDistance();// 查询里程
                         }
                     }
-
                 } catch (Exception e) {
-
                 }
             }
-
             @Override
             public void onDistanceCallback(DistanceResponse response) {
-                //viewUtil.showToast(StartAndEndActivity.this, "里程：" + (int)response.getDistance() + "米");
                 super.onDistanceCallback(response);
                 int  bbbb=(int)response.getDistance();
                 String DATE_FORMAT = "%02d米";
                 textdistance.setText(String.format(DATE_FORMAT,bbbb));
-
             }
         };
         entityListener = new OnEntityListener() {
@@ -800,24 +474,19 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                     CurrentLocation.locTime = CommonUtil.toTimeStamp(location.getTime());
                     CurrentLocation.latitude = currentLatLng.latitude;
                     CurrentLocation.longitude = currentLatLng.longitude;
-
                     if (null != mapUtil) {
                         mapUtil.updateMapLocation(currentLatLng, mCurrentDirection);//显示当前位置
                         mapUtil.animateMapStatus(currentLatLng);//缩放
                     }
                 } catch (Exception x) {
-
                 }
             }
 
         };
-
         traceListener = new OnTraceListener() {
-
             @Override
             public void onBindServiceCallback(int errorNo, String message) {
             }
-
             @Override
             public void onStartTraceCallback(int errorNo, String message) {
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.START_TRACE_NETWORK_CONNECT_FAILED <= errorNo) {
@@ -835,7 +504,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                     mixSpeakUtil.speak(message);
                 }
             }
-
             @Override
             public void onStopTraceCallback(int errorNo, String message) {
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.CACHE_TRACK_NOT_UPLOAD == errorNo) {
@@ -859,7 +527,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                     mixSpeakUtil.speak(message);
                 }
             }
-
             @Override
             public void onStartGatherCallback(int errorNo, String message) {
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.GATHER_STARTED == errorNo) {
@@ -867,7 +534,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                     SharedPreferences.Editor editor = trackApp.trackConf.edit();
                     editor.putBoolean("is_gather_started", true);
                     editor.apply();
-                    //setGatherBtnStyle();
                     StartTimePost();
                     stopRealTimeLoc();
                     startRealTimeLoc(packInterval);
@@ -876,9 +542,7 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                 if(errorNo==12002){
                     mixSpeakUtil.speak(message);
                 }
-
             }
-
             @Override
             public void onStopGatherCallback(int errorNo, String message) {
                 if (StatusCodes.SUCCESS == errorNo || StatusCodes.GATHER_STOPPED == errorNo) {
@@ -887,23 +551,26 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                     editor.remove("is_gather_started");
                     editor.apply();
                     StopTimePost();
-                    //setGatherBtnStyle();
                     firstLocate = true;
+                    isPause=false;
                     stopRealTimeLoc();
                     startRealTimeLoc(Constants.LOC_INTERVAL);
-
                     if (trackPoints.size() >= 1) {
                         try {
                             mapUtil.drawEndPoint(trackPoints.get(trackPoints.size() - 1));
                         } catch (Exception e) {
-
                         }
+                    }
+                    if (null != trackPoints) {
+                        trackPoints.clear();
+                        pageIndex = 1;
+                        //trackPoints=null;
+                        //trackPoints=new ArrayList<>();
                     }
                 }
             }
             @Override
             public void onPushCallback(byte messageType, PushMessage pushMessage) {
-
             }
         };
     }
@@ -924,7 +591,7 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         trackApp.mClient.queryDistance(distanceRequest, trackListener);// 查询里程
     }
     /**
-     * 查询历史里程
+     * 查询历史里程、补偿
      */
     private void queryDistance(long beginTime,long endTime) {
         DistanceRequest distanceRequest = new DistanceRequest(trackApp.getTag(), trackApp.serviceId, trackApp.entityName);
@@ -943,7 +610,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
      * 查询历史轨迹
      */
     private void queryHistoryTrack() {
-
         historyTrackRequest = new HistoryTrackRequest();
         ProcessOption processOption = new ProcessOption();//纠偏选项
         processOption.setRadiusThreshold(20);//精度过滤
@@ -971,10 +637,8 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
          * 打开纠偏时，请求时间段内轨迹点数量不能超过2万，否则将返回错误。
          */
         historyTrackRequest.setProcessed(true);
-
         historyTrackRequest.setServiceId(trackApp.serviceId);//设置轨迹服务id，Trace中的id
         historyTrackRequest.setEntityName(trackApp.entityName);//Trace中的entityName
-
         /**
          * 设置startTime和endTime，会请求这段时间内的轨迹数据;
          * 这里查询采集开始到采集结束之间的轨迹数据
@@ -984,13 +648,11 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         historyTrackRequest.setPageIndex(pageIndex);
         historyTrackRequest.setPageSize(Constants.PAGE_SIZE);
         trackApp.mClient.queryHistoryTrack(historyTrackRequest, trackListener);//发起请求，设置回调监听
-
     }
     /**
      * 查询历史轨迹,补偿
      */
     public void queryHistoryTrack(long beginTime,long endTime) {
-
         historyTrackRequest = new HistoryTrackRequest();
         ProcessOption processOption = new ProcessOption();//纠偏选项
         processOption.setRadiusThreshold(20);//精度过滤
@@ -1010,17 +672,14 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         historyTrackRequest.setEndTime(endTime);
         historyTrackRequest.setPageIndex(pageIndex);
         historyTrackRequest.setPageSize(Constants.PAGE_SIZE);
-
         trackApp.mClient.queryHistoryTrack(historyTrackRequest, trackListener);//发起请求，设置回调监听
     }
-
     static class RealTimeHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
         }
     }
-
     /**
      * 注册广播（电源锁、GPS状态）
      */
@@ -1028,14 +687,12 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         if (trackApp.isRegisterReceiver) {
             return;
         }
-
         if (null == wakeLock) {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "track upload");
         }
         if (null == trackReceiver) {
             trackReceiver = new TrackReceiver(wakeLock);
         }
-
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
@@ -1043,9 +700,7 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         filter.addAction(StatusCodes.GPS_STATUS_ACTION);
         trackApp.registerReceiver(trackReceiver, filter);
         trackApp.isRegisterReceiver = true;
-
     }
-
     private void unregisterPowerReceiver() {
         if (!trackApp.isRegisterReceiver) {
             return;
@@ -1055,7 +710,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         }
         trackApp.isRegisterReceiver = false;
     }
-
     @Override
     protected void onStart() {
         super.onStart();
@@ -1066,18 +720,19 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                 && trackApp.trackConf.getBoolean("is_gather_started", false)) {
             startRealTimeLoc(packInterval);
             addOrRealtime=true;
-        } else {
+            isPause=true;
+           // mhandle.removeCallbacks(timeRunable);
+        }
+        else {
             startRealTimeLoc(Constants.LOC_INTERVAL);
         }
     }
-
     @Override
     protected void onResume() {
         super.onResume();
         mapUtil.onResume();
         Log.e("生命周期","onResume");
         mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_UI);
-
         // 在Android 6.0及以上系统，若定制手机使用到doze模式，请求将应用添加到白名单。
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             String packageName = trackApp.getPackageName();
@@ -1093,30 +748,68 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
             }
         }
     }
-
     @Override
     protected void onPause() {
         super.onPause();
         mapUtil.onPause();
         Log.e("生命周期","onPause");
     }
-
     @Override
     protected void onStop() {
         super.onStop();
         Log.e("生命周期","onStop");
         stopRealTimeLoc();
+        if (trackApp.trackConf.contains("is_trace_started")
+                && trackApp.trackConf.contains("is_gather_started")
+                && trackApp.trackConf.getBoolean("is_trace_started", false)
+                && trackApp.trackConf.getBoolean("is_gather_started", false)) {
+            mhandle.post(timeRunable);
+        }
+        //mhandle.post(timeRunable);
         mSensorManager.unregisterListener(this);
     }
+        //计时器
+    private Handler mhandle = new Handler();
+    private boolean isPause = false;//是否暂停
+    private boolean isNumber = true;//是否暂停
+
+
+    /*****************计时器*******************/
+    private Runnable timeRunable = new Runnable() {
+        @Override
+        public void run() {
+            long  endTime = CommonUtil.getCurrentTime();
+            Time = SharedPreferencesUtils.getParam(StartAndEndActivity.this, "Time", 0L);
+            long count=endTime-Time;
+            int m= (int) (count/60);//分
+            String speak="你现在已经连续巡查"+m+"分钟了，请关闭采集";
+            if(count>=30*60&&isNumber)
+            {
+                mixSpeakUtil.speak(speak);
+                isNumber=false;
+            }
+            //mixSpeakUtil.speak("线程");
+            if (!isPause) {
+                //递归调用本runable对象，实现每隔一秒一次执行任务
+                mhandle.postDelayed(this, 5*60*1000);
+                isNumber=true;
+            }
+        }
+    };
+
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.e("生命周期","onDestroy");
+        if (null != trackPoints) {
+            trackPoints.clear();
+        }
+        trackPoints = null;
         mapUtil.clear();
         stopRealTimeLoc();
+        stopAlarm();
     }
-
     public boolean isOpenProvider() {
         //获取定位服务
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -1131,7 +824,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         }
         return true;
     }
-
     private void startLocationService() {
         //检查位置提供器是否开启，如果开启则给provider赋值
         if (isOpenProvider()) {
@@ -1141,7 +833,7 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
             //绑定定位事件，监听位置是否改变
             //第一个参数为控制器类型第二个参数为监听位置变化的时间间隔（单位：毫秒）
             //第三个参数为位置变化的间隔（单位：米）第四个参数为位置监听器
-            locationManager.requestLocationUpdates(provider, 5000, (float) 5,
+            locationManager.requestLocationUpdates(provider, 10000, (float) 15,
                     locationListener);
             //监听卫星信号强度
             locationManager.addGpsStatusListener(gpsStatusListener);
@@ -1160,12 +852,10 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         } else {
         }
     }
-
     /**
      * gps状态监听类,用于gps获取gps信号强弱
      */
     GpsStatus.Listener gpsStatusListener = new GpsStatus.Listener() {
-
         @Override
         public void onGpsStatusChanged(int event) {
             switch (event) {
@@ -1218,10 +908,8 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
             }
         }
     };
-
     //当位置发生变化时，会触发这个监听
     private LocationListener locationListener = new LocationListener() {
-
         /**
          * 位置信息变化时触发
          * @param location
@@ -1230,102 +918,54 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         public void onLocationChanged(Location location) {
             //实时获取Location 位置信息
         }
-
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
         }
-
         /**
          * GPS开启时触发
          * @param provider
          */
         @Override
         public void onProviderEnabled(String provider) {
-            mixSpeakUtil.speak(" GPS开启");
+//            mixSpeakUtil.speak(" GPS开启");
         }
-
         /**
          *  GPS禁用时触发
          * @param provider
          */
         @Override
         public void onProviderDisabled(String provider) {
-            mixSpeakUtil.speak(" GPS关闭");
         }
     };
-
-//    public class AlarmReceiver extends BroadcastReceiver {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (intent.getAction().equals("LOCATION_CLOCK")) {
-//                Log.e("ggb", "--->>>   onReceive  LOCATION_CLOCK");
-//                Intent locationIntent = new Intent(context, StartAndEndActivity.class);
-//                context.startService(locationIntent);
-//            }
-//        }
-//    }
-
-  //  private TakePhotoButton buttontake;
-    private TakePhotoButton button;
-
-
+    public class AlarmReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("LOCATION_CLOCK")) {
+                Log.e("ggb", "--->>>   onReceive  LOCATION_CLOCK");
+                Intent locationIntent = new Intent(context, StartAndEndActivity.class);
+                context.startService(locationIntent);
+            }
+        }
+    }
     private int  startGatherButton(){
-//        buttontake = (TakePhotoButton) findViewById(R.id.button_take);
         button = (TakePhotoButton) findViewById(R.id.normal_btn);
-//        buttontake.setOnProgressTouchListener(new TakePhotoButton.OnProgressTouchListener() {
-//            @Override
-//            public void onClick(TakePhotoButton photoButton) {
-//                Toast.makeText(StartAndEndActivity.this,"单机",Toast.LENGTH_SHORT).show();
-//            }
-//
-//            @Override
-//            public void onLongClick(TakePhotoButton photoButton) {
-//                Toast.makeText(StartAndEndActivity.this,"长按",Toast.LENGTH_SHORT).show();
-//                buttontake.start();
-//
-//            }
-//
-//            @Override
-//            public void onLongClickUp(TakePhotoButton photoButton) {
-//                onFinish();
-//            }
-//
-//
-//            @Override
-//            public void onFinish() {
-//                Toast.makeText(StartAndEndActivity.this,"录制结束",Toast.LENGTH_SHORT).show();
-//            }
-//        });
-
         button.setOnProgressTouchListener(new TakePhotoButton.OnProgressTouchListener() {
             @Override
             public void onClick(TakePhotoButton photoButton) {
                 Toast.makeText(StartAndEndActivity.this,"长按开始/结束",Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onLongClick(TakePhotoButton photoButton) {
-                //Toast.makeText(StartAndEndActivity.this,"长按",Toast.LENGTH_SHORT).show();
                 button.start();
-
             }
-//
-//            @Override
-//            public void onLongClickUp(TakePhotoButton photoButton) {
-//               // onFinish();  //执行的方法
-//            }
-
-
             @Override
             public void onFinish() {
-                //Toast.makeText(StartAndEndActivity.this,"录制结束",Toast.LENGTH_SHORT).show();
                 if (trackApp.isGatherStarted) {
                     //停止采集
-                    setStopGatherStyle();
                     trackApp.mClient.stopTrace(trackApp.mTrace, null);
                     trackApp.mClient.stopGather(traceListener);
                     Toast.makeText(StartAndEndActivity.this, "关闭服务中，请稍后...", Toast.LENGTH_LONG).show();
-
+                    setStopGatherStyle();
                 }
                 else {
                     //开始采集
@@ -1333,7 +973,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                         Toast.makeText(StartAndEndActivity.this, "请检查网络或GPS是否打开", Toast.LENGTH_LONG).show();
                         return;
                     }
-
                     trackApp.mClient.startTrace(trackApp.mTrace, traceListener);//开始服务
                     new Thread() {
                         @Override
@@ -1341,7 +980,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                             super.run();
                             try {
                                 Thread.sleep(2000);//休眠2秒
-
                                 trackApp.mClient.setInterval(Constants.DEFAULT_GATHER_INTERVAL, packInterval);
                                 trackApp.mClient.startGather(traceListener);//开启采集
                                 setStartGatherStyle();
@@ -1351,21 +989,14 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
-
                         }
 
                     }.start();
-
-
-
                 }
             }
         });
         return 1;
     }
-
-
-
     //结束按钮
     private void setStartGatherStyle(){
         button.outCircleColor =  Color.parseColor("#F10D27");
@@ -1373,7 +1004,6 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         button.progressColor = Color.parseColor("#00FFFF");
         button.setTextColor(0xFFFFFFFF);
         button.setTextstr("结束采集");
-
     }
     //开始按钮样式
     private void setStopGatherStyle(){
@@ -1382,8 +1012,20 @@ public class StartAndEndActivity extends Activity implements View.OnClickListene
         button.progressColor = Color.parseColor("#00FFFF");
         button.setTextColor(0xFFFF0000);
         button.setTextstr("开始采集");
-
-
     }
-
+    /**
+     * 关闭Alarm
+     */
+    public void stopAlarm() {
+        Intent intent = new Intent("LOCATION_CLOCK");
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+        AlarmManager alarmManager = (AlarmManager)getSystemService(ALARM_SERVICE);
+        try {
+            alarmManager.cancel(pendingIntent);
+            Log.d("销毁", "Alarm is Canceled.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("销毁", "Alarm is not Canceled: " + e.toString());
+        }
+    }
 }

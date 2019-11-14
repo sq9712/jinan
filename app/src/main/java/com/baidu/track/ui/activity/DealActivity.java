@@ -1,20 +1,19 @@
 package com.baidu.track.ui.activity;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,8 +37,8 @@ public class DealActivity extends AppCompatActivity implements View.OnClickListe
 
     private Spinner spinner;
     private ListView lv;
-
-   private Button progress;
+    private RadioGroup nRg1;
+    private Button progress;
 
     private LinearLayout options;
     private TextView title,typeView;
@@ -71,7 +70,7 @@ public class DealActivity extends AppCompatActivity implements View.OnClickListe
         typeView = findViewById(R.id.ResponsibilityType);
         progress = findViewById(R.id.progress);
         //数据
-        data_list = new ArrayList<String>();
+        data_list = new ArrayList<>();
         item_list = new ArrayList<>();
         info_list = new ArrayList<>();
         subject_list = new ArrayList<>();
@@ -85,59 +84,9 @@ public class DealActivity extends AppCompatActivity implements View.OnClickListe
                 JSONParser.changeToken(this);
                 result = jsonParser.sendState(url,jsonParser.getInfo(this));
                 JSONObject newJson = new JSONObject(result);
-                String data = newJson.getString("data");
-                JSONArray allarr = new JSONArray(data);
-                for (int i=0;i<allarr.length();i++){
-                    String str = allarr.getString(i);
-                    JSONObject object = new JSONObject(str);
-                    String name = object.getString("name");
-                    data_list.add(name);
-                    String responsibilities = object.getString("responsibilities");
-                    JSONArray arrrespon = new JSONArray(responsibilities);
-                    for(int j= 0;j<arrrespon.length();j++){
-                        String category = arrrespon.getString(j);
-                        JSONObject object1 = new JSONObject(category);
-                        String item= object1.getString("item");
-                        String subject= object1.getString("subject_duty");//0是部门，1是街道
-                        Log.i("subject",subject);
-                        subject_list.add(subject);
-                        item_list.add(item);
-
-                    }
-                    info_list.add(item_list.toString());
-                    sum_list.add(subject_list.toString());
-                    subject_list.clear();
-                    item_list.clear();
-                    Log.i("info_list",info_list.toString());
-                    Log.i("sum_list",sum_list.toString());
-                }
+                getJson(newJson);
             }else{
-                String data = allobj.getString("data");
-                JSONArray allarr = new JSONArray(data);
-                for (int i=0;i<allarr.length();i++){
-                    String str = allarr.getString(i);
-                    JSONObject object = new JSONObject(str);
-                    String name = object.getString("name");
-                    data_list.add(name);
-                    String responsibilities = object.getString("responsibilities");
-                    JSONArray arrrespon = new JSONArray(responsibilities);
-                    for(int j= 0;j<arrrespon.length();j++){
-                        String category = arrrespon.getString(j);
-                        JSONObject object1 = new JSONObject(category);
-                        String item= object1.getString("item");
-                        String subject= object1.getString("subject_duty");//0是部门，1是街道
-                        Log.i("subject",subject);
-                        subject_list.add(subject);
-                        item_list.add(item);
-
-                    }
-                    info_list.add(item_list.toString());
-                    sum_list.add(subject_list.toString());
-                    subject_list.clear();
-                    item_list.clear();
-                    Log.i("info_list",info_list.toString());
-                    Log.i("sum_list",sum_list.toString());
-                }
+                getJson(allobj);
             }
         }catch (JSONException e){
             e.printStackTrace();
@@ -210,7 +159,7 @@ public class DealActivity extends AppCompatActivity implements View.OnClickListe
 
                 int checkedItemPosition = lv.getCheckedItemPosition();
                 if (checkedItemPosition == -1) {
-                    // //-1未选择选项
+                     //-1未选择选项
                     Toast.makeText(this, "请选择所属分类具体事项", Toast.LENGTH_SHORT).show();
                 } else {
                     String checked = sublist.get(checkedItemPosition);
@@ -219,7 +168,7 @@ public class DealActivity extends AppCompatActivity implements View.OnClickListe
                     bundle.putString("title", editTitle);
                     bundle.putString("content", editContent);
                     bundle.putString("subject", checked);
-                    bundle.putString("tagname", "DealFragment");
+                    bundle.putString("tagname", "DealActivity");
                     Intent intent = new Intent();
                     intent.putExtras(bundle);
                     intent.setClass(this, HandleActivity.class);
@@ -242,5 +191,35 @@ public class DealActivity extends AppCompatActivity implements View.OnClickListe
      */
     public void onBack(View v) {
         super.onBackPressed();
+    }
+
+    public void getJson(JSONObject jsonObject){
+        try{
+            String data = jsonObject.getString("categories");
+            JSONArray allarr = new JSONArray(data);
+            for (int i=0;i<allarr.length();i++){
+                String str = allarr.getString(i);
+                JSONObject object = new JSONObject(str);
+                String name = object.getString("name");
+                data_list.add(name);
+                String responsibilities = object.getString("responsibilities");
+                JSONArray arrrespon = new JSONArray(responsibilities);
+                for(int j= 0;j<arrrespon.length();j++){
+                    String category = arrrespon.getString(j);
+                    JSONObject object1 = new JSONObject(category);
+                    String item= object1.getString("item");
+                    String subject= object1.getString("subject_duty");//0是部门，1是街道
+                    subject_list.add(subject);
+                    item_list.add(item);
+
+                }
+                info_list.add(item_list.toString());
+                sum_list.add(subject_list.toString());
+                subject_list.clear();
+                item_list.clear();
+            }
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
     }
 }

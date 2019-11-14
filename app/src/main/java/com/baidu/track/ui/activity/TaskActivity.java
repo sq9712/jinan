@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +19,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -57,11 +60,9 @@ public class TaskActivity extends AppCompatActivity {
     private List<String> sublist = new ArrayList<>();
     private ArrayAdapter<String> arr_adapter;
     private String url = BASE_URL+"/api/categories";
-    private String taskTitle,id,content,createTime,lastTime,address,result,getimage;
+    private String taskTitle,id,content,createTime,lastTime,address,result,information,tagname;
 
-    private PhotoView imgRead;
-    private View imgEntryView;
-    private com.baidu.track.photoview.PhotoView img;
+    private ArrayList<String> urlList  = new ArrayList<>();
 
     //重点二：设置单选与多选框的样式
     //☆☆☆:创建adapter,布局加载系统默认的单选框
@@ -78,12 +79,13 @@ public class TaskActivity extends AppCompatActivity {
         mContext= this;
         ButterKnife.bind(this);
 
+
+
         options = findViewById(R.id.btn_activity_options);
         options.setVisibility(View.INVISIBLE);
         title = findViewById(R.id.tv_activity_title);
         title.setText("事件处理");
 
-        imgRead = findViewById(R.id.img_read);
         Bundle bundle=getIntent().getExtras();
         taskTitle = bundle.getString("title");
         id=bundle.getString("id");
@@ -91,9 +93,12 @@ public class TaskActivity extends AppCompatActivity {
         lastTime = bundle.getString("lastTime");
         address = bundle.getString("address");
         content = bundle.getString("content");
-        getimage = bundle.getString("getimage");
-//        String role = bundle.getString("role");
+        information = bundle.getString("information");
+        urlList = bundle.getStringArrayList("imgurls");
+        tagname = bundle.getString("tagname");
         contentView = findViewById(R.id.Details);
+        contentView.setMovementMethod(ScrollingMovementMethod.getInstance());
+
         ctimeView = findViewById(R.id.Time);
         ltimeView = findViewById(R.id.lastTime);
         addressView = findViewById(R.id.Place);
@@ -101,82 +106,36 @@ public class TaskActivity extends AppCompatActivity {
         titleView.setText(taskTitle);
         ctimeView.setText(createTime);
         ltimeView.setText(lastTime);
-        addressView.setText(address);
         contentView.setText(content);
-
-        view = (TextView) findViewById(R.id.spinnerText);
+         if(address.equals("null")){
+             addressView.setText("空");
+         }else{
+             addressView.setText(address);
+         }
+        view =  findViewById(R.id.spinnerText);
         spinner = findViewById(R.id.Spinner01);
         lv = findViewById(R.id.lv_single);
         typeView = findViewById(R.id.ResponsibilityType);
 
         //数据
-        data_list = new ArrayList<String>();
+        data_list = new ArrayList<>();
         item_list = new ArrayList<>();
         info_list = new ArrayList<>();
         subject_list = new ArrayList<>();
         sum_list = new ArrayList<>();
+
         try{
             JSONParser jsonParser = new JSONParser();
             result = jsonParser.sendState(url,jsonParser.getInfo(this));
             JSONObject allobj = new JSONObject(result);
-
             if( allobj.optString("message").equals("Unauthenticated.")){
-               JSONParser.changeToken(mContext);
+                JSONParser.changeToken(mContext);
                 result = jsonParser.sendState(url,jsonParser.getInfo(mContext));
                 JSONObject newJson = new JSONObject(result);
-                String data = newJson.getString("data");
-                JSONArray allarr = new JSONArray(data);
-                for (int i=0;i<allarr.length();i++){
-                    String str = allarr.getString(i);
-                    JSONObject object = new JSONObject(str);
-                    String name = object.getString("name");
-                    data_list.add(name);
-                    String responsibilities = object.getString("responsibilities");
-                    JSONArray arrrespon = new JSONArray(responsibilities);
-                    for(int j= 0;j<arrrespon.length();j++){
-                        String category = arrrespon.getString(j);
-                        JSONObject object1 = new JSONObject(category);
-                        String item= object1.getString("item");
-                        String subject= object1.getString("subject_duty");//0是部门，1是街道
-                        Log.i("subject",subject);
-                        subject_list.add(subject);
-                        item_list.add(item);
-
-                    }
-                    info_list.add(item_list.toString());
-                    sum_list.add(subject_list.toString());
-                    subject_list.clear();
-                    item_list.clear();
-                    Log.i("info_list",info_list.toString());
-                    Log.i("sum_list",sum_list.toString());
-                }
+                getJson(newJson);
             }else{
-                String data = allobj.getString("data");
-                JSONArray allarr = new JSONArray(data);
-                for (int i=0;i<allarr.length();i++){
-                    String str = allarr.getString(i);
-                    JSONObject object = new JSONObject(str);
-                    String name = object.getString("name");
-                    data_list.add(name);
-                    String responsibilities = object.getString("responsibilities");
-                    JSONArray arrrespon = new JSONArray(responsibilities);
-                    for(int j= 0;j<arrrespon.length();j++){
-                        String category = arrrespon.getString(j);
-                        JSONObject object1 = new JSONObject(category);
-                        String item= object1.getString("item");
-                        String subject= object1.getString("subject_duty");//0是部门，1是街道
-                        Log.i("subject",subject);
-                        subject_list.add(subject);
-                        item_list.add(item);
-
-                    }
-                    info_list.add(item_list.toString());
-                    sum_list.add(subject_list.toString());
-                    subject_list.clear();
-                    item_list.clear();
-                }
+                getJson(allobj);
             }
-
         }catch (JSONException e){
             e.printStackTrace();
             Toast.makeText(mContext,"请先去登录",Toast.LENGTH_LONG).show();
@@ -185,7 +144,7 @@ public class TaskActivity extends AppCompatActivity {
 
         adapter = new ArrayAdapter(mContext,R.layout.array_adapter);
         //适配器
-        arr_adapter= new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, data_list);
+        arr_adapter= new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, data_list);
         //设置样式
         arr_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //加载适配器
@@ -199,7 +158,6 @@ public class TaskActivity extends AppCompatActivity {
                 sublist.clear();
                 String info = info_list.get(arg2);
                 String subject1 = sum_list.get(arg2);
-
                 try{
                     JSONArray infoarr = new JSONArray(info);
                     JSONArray subarr = new JSONArray(subject1);
@@ -218,7 +176,6 @@ public class TaskActivity extends AppCompatActivity {
                 //将模拟数据添加到adapter适配器中
                 adapter.addAll(selectlist);
                 lv.setAdapter(adapter);
-
             }
             public void onNothingSelected(AdapterView<?> arg0) {
                 // TODO Auto-generated method stub
@@ -239,36 +196,6 @@ public class TaskActivity extends AppCompatActivity {
                 }
             }
         });
-        Glide.with(this)
-                .load(getimage)
-                .into( imgRead);
-        LayoutInflater inflater = LayoutInflater.from(this);
-        imgEntryView = inflater.inflate(R.layout.dialog_photo, null);
-        // 加载自定义的布局文件
-        final AlertDialog dialog = new AlertDialog.Builder(TaskActivity.this).create();
-        img = imgEntryView.findViewById(R.id.large_image);
-
-        //设置不可以双指缩放移动放大等操作，跟普通的image一模一样,默认情况下就是disenable()状态
-        imgRead.disenable();
-        imgRead.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Glide.with(getApplicationContext())
-                        .load(getimage)
-                        .into( img);
-                dialog.setView(imgEntryView); // 自定义dialog
-                dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                dialog.show();
-
-            }
-        });
-//        // 点击大图关闭dialog
-//        imgEntryView.setOnClickListener(new View.OnClickListener() {
-//            public void onClick(View paramView) {
-//                dialog.cancel();
-//            }
-//        });
 
     }
 
@@ -289,6 +216,8 @@ public class TaskActivity extends AppCompatActivity {
             bundle.putString("taskTitle", taskTitle);
             bundle.putString("content", content);
             bundle.putString("address", address);
+            bundle.putString("information",information);
+            bundle.putStringArrayList("imgurls", urlList);
             bundle.putString("tagname", "TaskActivity");
             Intent intent = new Intent();
             intent.putExtras(bundle);
@@ -301,8 +230,44 @@ public class TaskActivity extends AppCompatActivity {
      * 回退事件
      */
     public void onBack(View v) {
-        super.onBackPressed();
+        if (tagname.equals("LookActivity")){
+            startActivity(new Intent(this,LookActivity.class));
+            finish();
+        }else{
+            startActivity(new Intent(this,AllTaskActivity.class));
+            finish();
+        }
+
     }
 
+    public void getJson(JSONObject jsonObject){
+        try{
+            String data = jsonObject.getString("categories");
+            JSONArray allarr = new JSONArray(data);
+            for (int i=0;i<allarr.length();i++){
+                String str = allarr.getString(i);
+                JSONObject object = new JSONObject(str);
+                String name = object.getString("name");
+                data_list.add(name);
+                String responsibilities = object.getString("responsibilities");
+                JSONArray arrrespon = new JSONArray(responsibilities);
+                for(int j= 0;j<arrrespon.length();j++){
+                    String category = arrrespon.getString(j);
+                    JSONObject object1 = new JSONObject(category);
+                    String item= object1.getString("item");
+                    String subject= object1.getString("subject_duty");//0是部门，1是街道
+                    Log.i("subject",subject);
+                    subject_list.add(subject);
+                    item_list.add(item);
+                }
+                info_list.add(item_list.toString());
+                sum_list.add(subject_list.toString());
+                subject_list.clear();
+                item_list.clear();
+            }
+        }catch (JSONException e){
+            e.printStackTrace();
+        }
+    }
 
 }

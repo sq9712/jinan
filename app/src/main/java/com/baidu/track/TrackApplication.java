@@ -28,13 +28,22 @@ import com.baidu.trace.model.OnCustomAttributeListener;
 import com.baidu.trace.model.ProcessOption;
 import com.baidu.trace.model.TransportMode;
 import com.baidu.track.activity.StartAndEndActivity;
+import com.baidu.track.api.JSONParser;
 import com.baidu.track.utils.CommonUtil;
+import com.baidu.track.utils.MixSpeakUtil;
 import com.baidu.track.utils.NetUtil;
 import com.baidu.track.utils.SharedPreferencesUtils;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.baidu.track.ui.activity.MainActivity.BASE_URL;
 
 /**
  * Created by zhh
@@ -90,15 +99,14 @@ public class TrackApplication extends Application {
 
     private String name;
 
-
-    private Notification notification = null;
+    private MixSpeakUtil mixSpeakUtil;//百度语音
 
     @Override
     public void onCreate() {
         super.onCreate();
         mContext = getApplicationContext();
 
-
+        mixSpeakUtil=MixSpeakUtil.getInstance(mContext);
         registerActivityLifecycleCallbacks(activityLifecycleCallbacks);
 
         androidId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -158,7 +166,7 @@ public class TrackApplication extends Application {
             mClient.queryRealTimeLoc(locRequest, entityListener);
         }
     }
-    private String userName;
+
 
     private static final String CHANNEL_ID_SERVICE_RUNNING = "CHANNEL_ID_SERVICE_RUNNING";
     /**
@@ -206,6 +214,7 @@ public class TrackApplication extends Application {
      */
     private void clearTraceStatus() {
         if (trackConf.contains("is_trace_started") || trackConf.contains("is_gather_started")) {
+            mixSpeakUtil.speak("强制杀死进程了");
             SharedPreferences.Editor editor = trackConf.edit();
             editor.remove("is_trace_started");
             editor.remove("is_gather_started");
@@ -231,9 +240,6 @@ public class TrackApplication extends Application {
     public int getTag() {
         return mSequenceGenerator.incrementAndGet();
     }
-
-
-
 
     /**
      * 当前Acitity个数
@@ -280,6 +286,7 @@ public class TrackApplication extends Application {
                 long groundTime= CommonUtil.getCurrentTime();
                 SharedPreferencesUtils.setParam(mContext, "groundTime", groundTime);//保存切换应用时间到SharedPreferences中
                 Log.e("应用状态", String.valueOf(groundTime));
+
             }
         }
 
@@ -291,5 +298,33 @@ public class TrackApplication extends Application {
         public void onActivityDestroyed(Activity activity) {
         }
     };
-
+    /**
+     * 结束巡逻，上传结束时间
+     */
+    private String url = BASE_URL+"/api/startAndEndPatrol";
+    private void StopTimePost(){
+        SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
+        // 获取当前时间
+        Date date1 = new Date(System.currentTimeMillis());
+        String endTime = simpleDateFormat1.format(date1);
+        JSONObject alljson1 = new JSONObject();
+        try{
+            SharedPreferences sp=getSharedPreferences("loginInfo", MODE_PRIVATE);
+            alljson1.put("end_time",endTime);
+            alljson1.put("id",sp.getString("track_id",""));
+            String str = JSONParser.post(alljson1,url, JSONParser.getInfo(this));
+            JSONObject lastjson = new JSONObject(str);
+            if(lastjson.optString("message").equals("Unauthenticated.")){
+                JSONParser.changeToken(this);
+                JSONParser.post(alljson1,url, JSONParser.getInfo(this));
+            }
+            //获取编辑器
+            SharedPreferences.Editor editor=sp.edit();
+            editor.putString("track_id", null);
+            //提交修改
+            editor.commit();
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+    }
 }

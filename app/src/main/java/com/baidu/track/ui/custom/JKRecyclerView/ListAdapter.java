@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.baidu.track.R;
@@ -49,10 +50,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.MyViewHolder>{
     class MyViewHolder extends RecyclerView.ViewHolder {
 
         TextView tv;
+        LinearLayout clickIcon;
 
         public MyViewHolder(View view) {
             super(view);
             tv=(TextView) view.findViewById(R.id.tv_item);
+            clickIcon = view.findViewById(R.id.click_icon);
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

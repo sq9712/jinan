@@ -4,19 +4,17 @@
     package="com.baidu.track"
     android:versionCode="316"
     android:versionName="3.1.6">
+
     <!-- Required -->
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" /> <!-- 位置权限 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- jpush -->
@@ -28,10 +26,7 @@
     <uses-permission android:name="android.permission.RECEIVE_USER_PRESENT" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Optional. Required for location feature -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- 用于开启 debug 版本的应用在 6.0 系统上的层叠窗口权限 -->
@@ -47,6 +42,13 @@
 
     <uses-permission android:name="android.permission.DEVICE_POWER" />
 
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.REPLACE_EXISTING_PACKAGE"/>
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES"/><!-- 8.0必要权限  -->
+
     <application
         android:name=".TrackApplication"
         android:allowBackup="true"
@@ -57,32 +59,10 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:replace="android:icon">
-        <activity android:name=".activity.TestActivity" />
-        <activity android:name=".ui.activity.ReadedLookActivity" />
-        <activity android:name=".activity.StartAndEndActivity"
-            android:theme="@style/AppTheme_1"/>
-        <activity
-            android:name=".ui.activity.DealActivity"
-            android:theme="@style/AppThemeNoTitle" />
-        <activity
-            android:name=".ui.activity.PersonActivity"
-            android:theme="@style/AppThemeNoTitle" />
-        <activity
-            android:name=".ui.activity.HandleActivity"
-            android:theme="@style/AppThemeNoTitle" />
-        <activity
-            android:name=".ui.activity.TaskActivity"
-            android:theme="@style/AppThemeNoTitle" />
-        <activity
-            android:name=".ui.activity.LookActivity"
-            android:theme="@style/AppThemeNoTitle" />
-        <activity
-            android:name=".ui.activity.MainActivity"
-            android:theme="@style/AppThemeNoTitle"
-            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".ui.activity.WelcomeActivity"
-            android:theme="@style/AppThemeFullScreen">
+            android:theme="@style/AppThemeFullScreen"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -90,16 +70,72 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".activity.TestActivity"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.ReadedLookActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".activity.StartAndEndActivity"
+            android:theme="@style/AppTheme_1"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.DealActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".ui.activity.PersonActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.HandleActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.TaskActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.LookActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.MainActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.MineTaskActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"/>
+        <activity
             android:name=".ui.activity.LoginActivity"
-            android:theme="@style/AppThemeNoTitle" />
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ui.activity.AllTaskActivity"
-            android:theme="@style/AppThemeNoTitle" />
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.StandardActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+        android:name=".ui.activity.RespondActivity"
+        android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.MattersActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".ui.activity.LegalActivity"
+            android:theme="@style/AppThemeNoTitle"
+            android:screenOrientation="portrait"/>
 
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="uQ2Uw2ZVR8LHQzoQjRzRtGvhMGnMGSnN" />
-
+            android:value="W0BnL1Zd2KBHGM2BtGhBp6XMGp0NkC13" />
 
         <activity
             android:name=".ui.activity.RuleActivity"

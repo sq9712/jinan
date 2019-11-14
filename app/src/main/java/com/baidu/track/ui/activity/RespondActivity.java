@@ -1,4 +1,81 @@
 package com.baidu.track.ui.activity;
 
-public class RespondActivity {
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.baidu.track.R;
+import com.baidu.track.data.RuleTool;
+import com.baidu.track.ui.custom.JKRecyclerView.ListAdapter;
+import com.baidu.track.ui.custom.JKRecyclerView.onItemClickListener;
+
+public class RespondActivity extends Activity {
+
+    private Context mContext;
+
+    private RecyclerView recyclerView;
+    private ListAdapter recycleAdapter;
+    private LinearLayout options;
+    private TextView title;
+    private RuleTool ruleTool;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_rule);
+        mContext = this;
+        recyclerView =  findViewById(R.id.recycler);
+        options = findViewById(R.id.btn_activity_options);
+        options.setVisibility(View.INVISIBLE);
+        title = findViewById(R.id.tv_activity_title);
+        title.setText("责任清单");
+        ruleTool = new RuleTool(this);
+
+        recycleAdapter= new ListAdapter(mContext , ruleTool.getDataList());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+        //设置布局管理器
+        recyclerView.setLayoutManager(layoutManager);
+        //设置为垂直布局，这也是默认的
+        layoutManager.setOrientation(OrientationHelper.VERTICAL);
+        //设置Adapter
+        recyclerView.setAdapter( recycleAdapter);
+        //设置增加或删除条目的动画
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
+        recycleAdapter.setItemClickListener(new onItemClickListener() {
+            @Override
+            public void itemClick(int position) {
+                Bundle bundle = new Bundle();
+                bundle.putString("info_list", ruleTool.getInfo_list().get(position));
+                bundle.putString("sum_list", ruleTool.getSum_list().get(position));
+                Intent intent = new Intent();
+                intent.putExtras(bundle);
+                intent.setClass(mContext, MattersActivity.class);
+                startActivity(intent);
+
+                }
+        });
+
+    }
+
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    /**
+     * 回退事件
+     */
+    public void onBack(View v) {
+        super.onBackPressed();
+    }
 }

@@ -10,9 +10,10 @@ Android/data/com.bugull.cameratakedemo/files/header/
 
     <!--<external-path  name = "my-images" path = "demo"/>-->
 
-    <paths>
+    <external-cache-path path="app/" name="apk"/>
         <external-path
             name="images"
             path="Pictures"/>
-    </paths>
+         <external-path path="." name="external_storage_root"/>
+
 </paths>

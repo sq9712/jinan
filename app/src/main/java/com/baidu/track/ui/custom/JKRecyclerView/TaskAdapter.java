@@ -1,13 +1,11 @@
 package com.baidu.track.ui.custom.JKRecyclerView;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.baidu.track.R;
@@ -53,14 +51,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         //holder.les_image.setImageBitmap(modle.getImage());
         holder.les_name.setText(modle.getTaskName());
         holder.les_des.setText(modle.getContent());
-        if(modle.getState().equals("1")){
-
-        }else if(modle.getState().equals("2")){
-            holder.les_statu.setText("无权处理");
-            holder.les_statu.setBackgroundResource(R.drawable.unfinish_icon);
-        }else {
+        if(modle.getState().equals("2")){
+            holder.les_statu.setText("处理完成");
+            holder.les_statu.setBackgroundResource(R.drawable.finished_icon);
+        }else if(modle.getState().equals("1")){
+            holder.les_statu.setText("配合责任");
+            holder.les_statu.setBackgroundResource(R.drawable.finish_icon);
+        }else if(modle.getState().equals("0")){
             holder.les_statu.setText("未处理");
             holder.les_statu.setBackgroundResource(R.drawable.unfinish_icon);
+        }else{
+            holder.les_statu.setText("处理中");
+            holder.les_statu.setBackgroundResource(R.drawable.finishing_icon);
         }
 
 
@@ -94,8 +96,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         TextView les_des;
         TextView les_statu;
         ViewGroup les_content;
-        //按钮菜单是否被打开
-        boolean isOpen = false;
         boolean opened = false;
 
 
@@ -118,12 +118,10 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         class SwipeTouchListener implements View.OnTouchListener {
             int startPos, scrollStartX, distance;
             //最小滑动距离，如果滑动的距离小于此值，则判定为点击事件
-            static final int minDistance = 1;
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 int action = event.getAction();
-                int x = (int) event.getX();
                 int scrollX = v.getScrollX();
 
                 switch (action) {
@@ -142,8 +140,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
 
                         break;
                     case MotionEvent.ACTION_UP:
-                            isOpen = true;
-                           swipeMenuListener.open();
+                        swipeMenuListener.open();
                             itemClickListener.itemClick(getAdapterPosition());
 
                         v.getParent().requestDisallowInterceptTouchEvent(false);

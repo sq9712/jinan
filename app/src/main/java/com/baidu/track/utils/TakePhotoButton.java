@@ -206,14 +206,6 @@ public class TakePhotoButton extends View {
                 isLongClick = false;
                 break;
             case MotionEvent.ACTION_UP:
-//            case MotionEvent.ACTION_CANCEL:
-//                if (isLongClick) {
-//                    isLongClick = false;
-//                    postInvalidate();
-//                    if (this.listener != null) {
-//                        //this.listener.onLongClickUp(this);
-//                    }
-//                }
                 break;
         }
         return true;
@@ -241,19 +233,9 @@ public class TakePhotoButton extends View {
          */
         void onLongClick(TakePhotoButton photoButton);
 
-//        /**
-//         * 长按抬起
-//         * @param photoButton
-//         */
-//        void onLongClickUp(TakePhotoButton photoButton);
-
 
         void onFinish();
     }
-//    // 画字体的画笔
-//    private Paint mTextPaint;
-//    //字体的颜色
-//    private int mTextColor;
     // 半径
     private float mRadius;
     // 字的长度
@@ -265,20 +247,6 @@ public class TakePhotoButton extends View {
     private int mXCenter;
     // 圆心y坐标
     private int mYCenter;
-//    private void setmTextPaint(){
-//        mTextPaint = new Paint();
-//        mTextPaint.setAntiAlias(true);
-//        mTextPaint.setColor(mTextColor);
-//        mTextPaint.setStyle(Paint.Style.FILL);
-//        mTextPaint.setTextSize(mRadius / 3);
-//
-//
-//        Paint.FontMetrics fm = mTextPaint.getFontMetrics();
-//        mTxtHeight = (int) Math.ceil(fm.descent - fm.ascent);
-//        mTextColor = Color.parseColor("#ffff4444");
-//        mRadius =80;
-//    }
-
 
     private int mTextSize;
     private Paint textPaint;

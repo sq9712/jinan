@@ -15,18 +15,18 @@
             android:id="@+id/Type"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal"
             android:layout_below="@+id/jktoolbar">
             <TextView
                 android:id="@+id/ListType"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_height="50dp"
                 android:layout_marginLeft="10dp"
                 android:text="责任清单类别："
                 android:gravity="center"
                 android:textColor="@color/colorBlack"
-                android:textSize="15sp"
+                android:textSize="18dp"
                 />
 
             <TextView
@@ -40,23 +40,16 @@
                 android:layout_height="wrap_content" />
 
         </LinearLayout>
-        <View
-            android:layout_height="2px"
-            android:background="@color/activity_deal_background"
-            android:layout_below="@+id/Type"
-            android:layout_marginTop="5dp"
-            android:layout_width="fill_parent">
 
-        </View>
-
-        <ListView
-            android:id="@+id/lv_single"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_below="@+id/Type"
-            android:elevation="5dp"
-            android:orientation="horizontal"
-            android:background="@layout/rectangle"/>
+    <ListView
+        android:id="@+id/lv_single"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_below="@+id/Type"
+        android:layout_marginTop="10dp"
+        android:background="@layout/rectangle"
+        android:elevation="5dp"
+        android:orientation="horizontal" />
 
         <TextView
             android:id="@+id/Responsibility"
@@ -64,35 +57,26 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/lv_single"
             android:layout_marginLeft="10dp"
+            android:layout_marginTop="20dp"
             android:text="责任类型："
             android:textColor="@color/colorBlack"
-            android:textSize="15sp"
+            android:textSize="18dp"
             />
         <TextView
             android:id="@+id/ResponsibilityType"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@+id/Responsibility"
+            android:layout_marginTop="20dp"
             android:layout_below="@+id/lv_single"
             android:textColor="@android:color/holo_green_dark"/>
-
-
-
-    <!--<include-->
-        <!--android:id="@+id/smallcomponentsview"-->
-        <!--layout="@layout/task_activity"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_below="@+id/layoutContent"/>-->
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/ResponsibilityType"
             android:layout_marginBottom="12dp"
-            android:layout_marginLeft="58dp"
-            android:layout_marginRight="58dp"
-            android:layout_marginTop="17dp"
+            android:layout_marginTop="30dp"
             android:gravity="center">
 
             <Button

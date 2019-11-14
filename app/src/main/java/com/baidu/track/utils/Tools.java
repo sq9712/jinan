@@ -24,16 +24,14 @@ public class Tools {
     }
 
     /**
-     * 2
-     * 获取版本号 3
-     * @return 当前应用的版本号 4
+     * 获取版本号 1
+     * @return 当前应用的版本号 1
      */
-    public static int getVersion(Context context) {
+    public static double getVersion(Context context) {
         try {
             PackageManager manager = context.getPackageManager();
             PackageInfo info = manager.getPackageInfo(context.getPackageName(),
                     0);
-            String version = info.versionName;
             int versioncode = info.versionCode;
             return versioncode;
         } catch (Exception e) {
@@ -41,19 +39,21 @@ public class Tools {
         }
         return 0;
     }
-    // if (VERSION.SDK_INT > 16) {
-    // Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
-    // final RenderScript rs = RenderScript.create(context);
-    // final Allocation input = Allocation.createFromBitmap(rs, sentBitmap,
-    // Allocation.MipmapControl.MIPMAP_NONE,
-    // Allocation.USAGE_SCRIPT);
-    // final Allocation output = Allocation.createTyped(rs, input.getType());
-    // final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs,
-    // Element.U8_4(rs));
-    // script.setRadius(radius /* e.g. 3.f */);
-    // script.setInput(input);
-    // script.forEach(output);
-    // output.copyTo(bitmap);
-    // return bitmap;
-    // }
+    /**
+     * 获取版本名称 3
+     * @return 当前应用的版本名称
+     */
+    public static String getVersionName(Context context) {
+        try {
+            PackageManager manager = context.getPackageManager();
+            PackageInfo info = manager.getPackageInfo(context.getPackageName(),
+                    0);
+            String version = info.versionName;
+            return version;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }

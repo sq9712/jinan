@@ -3,6 +3,8 @@ package com.baidu.track.utils;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.telephony.TelephonyManager;
+
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -65,7 +67,22 @@ public class CommonUtil {
         }
         return date.getTime() / 1000;
     }
-
+    /**
+     * 获取时分秒
+     *
+     * @param timestamp 时间戳（单位：毫秒）
+     *
+     * @return
+     */
+    public static String getHMS(long timestamp) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH时mm分ss秒");
+        try {
+            return sdf.format(new Timestamp(timestamp));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return String.valueOf(timestamp);
+    }
     /**
      * 获取设备IMEI码
      *

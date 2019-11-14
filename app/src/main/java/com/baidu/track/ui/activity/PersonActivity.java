@@ -68,8 +68,6 @@ public class PersonActivity extends Activity implements View.OnClickListener {
         title = findViewById(R.id.tv_activity_title);
         title.setText("个人中心");
 
-
-//        getDistance();
         sp=getSharedPreferences("loginInfo", MODE_PRIVATE);
 
         //设置菜单图标颜色为原色
@@ -85,15 +83,15 @@ public class PersonActivity extends Activity implements View.OnClickListener {
                         break;
                     case R.id.person_menu_4:
                         startActivity(new Intent(PersonActivity.this, TestActivity.class));
-
+                        break;
+                    case R.id.person_menu_5:
+                        startActivity(new Intent(PersonActivity.this, MineTaskActivity.class));
                         break;
                 }
                 return false;
             }
         });
-
         loginBtn.setOnClickListener(this);
-
     }
 
     public int getDistance(){
@@ -104,7 +102,6 @@ public class PersonActivity extends Activity implements View.OnClickListener {
         String str = formatter.format(curDate);
         //获取当前日期
         String str1 = formatter1.format(curDate);
-        Log.i("当前时间",str);
         //GET请求
         String gettrackUrl = "http://yingyan.baidu.com/api/v3/track/gettrack";
         trackApp = (TrackApplication)getApplicationContext();
@@ -113,7 +110,6 @@ public class PersonActivity extends Activity implements View.OnClickListener {
             appInfo =getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
             //ak
             msg = appInfo.metaData.getString("com.baidu.lbsapi.API_KEY");
-            Log.i("api_key",msg);
         } catch (PackageManager.NameNotFoundException e1) {
             // TODO Auto-generated catch block
             e1.printStackTrace();
@@ -125,30 +121,24 @@ public class PersonActivity extends Activity implements View.OnClickListener {
         map.put("mcode","19:D1:85:60:FA:F4:17:24:CD:D7:10:47:64:6E:52:3D:A7:7D:7F:17;com.baidu.track");
         map.put("start_time", String.valueOf(gettimeInMillis(str1+" 00:00:00 +0800")/1000));
         map.put("end_time", String.valueOf(gettimeInMillis(str)/1000));
+        map.put("is_processed","0");
 
-        Log.i("开始时间",String.valueOf(gettimeInMillis(str1+" 00:00:00 +0800")/1000));
-        Log.i("结束时间",String.valueOf(gettimeInMillis(str)/1000));
-        Log.i("msg",String.valueOf(map));
 
         JSONParser jsonParser = new JSONParser();
         String result = jsonParser.sendGETRequest(gettrackUrl,map,"UTF-8");
-        Log.i("获取历程",result);
         try{
             JSONObject object = new JSONObject(result);
             distance = object.getInt("distance");
         }catch (JSONException e){
             e.printStackTrace();
         }
-        Log.i("distance",String.valueOf(distance));
         return distance;
     }
 
     public long gettimeInMillis(String str){
         try {
             Calendar calendar = Calendar.getInstance();
-
             calendar.setTime(new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss +0800", Locale.getDefault()).parse(str));
-            Log.i("str",String.valueOf(new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss +0800", Locale.getDefault()).parse(str)));
             timeInMillis = calendar.getTimeInMillis();
         }catch (ParseException e){
             e.printStackTrace();
@@ -169,6 +159,7 @@ public class PersonActivity extends Activity implements View.OnClickListener {
             editor.putString("access_token", null);
             editor.commit();
             startActivity(new Intent(PersonActivity.this, LoginActivity.class));
+            finish();
         }
     }
 
@@ -183,8 +174,6 @@ public class PersonActivity extends Activity implements View.OnClickListener {
             if(alljson.optString("message").equals("Unauthenticated.")){
                 JSONParser.changeToken(this);
                 str = jsonParser.sendState(url,jsonParser.getInfo(this));
-                Log.i("newStr",str);
-
                 JSONObject newJson = new JSONObject(str);
                 String  data= newJson.getString("data");
                 JSONArray taskArray = new JSONArray(data);
@@ -236,4 +225,6 @@ public class PersonActivity extends Activity implements View.OnClickListener {
     public void onBack(View v) {
         super.onBackPressed();
     }
+
+
 }

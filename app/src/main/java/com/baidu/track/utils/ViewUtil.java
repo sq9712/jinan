@@ -92,7 +92,7 @@ public class ViewUtil {
      * @param numberPicker
      */
     private static void resizeNumberPicker(NumberPicker numberPicker) {
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(150, ViewGroup.LayoutParams.WRAP_CONTENT);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(90, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(15, 0, 15, 0);
         numberPicker.setLayoutParams(params);
     }

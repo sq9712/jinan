@@ -102,7 +102,6 @@ public class TrackQueryActivity extends BaseActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
         setTitle(R.string.track_query_title);
         setOptionsText();
         setOnClickListener(this);
@@ -111,8 +110,8 @@ public class TrackQueryActivity extends BaseActivity implements View.OnClickList
     }
 
     public void setOptionsText() {
-        LinearLayout layout = (LinearLayout) findViewById(R.id.layout_top);
-        TextView textView = (TextView) layout.findViewById(R.id.tv_options);
+        LinearLayout layout =  findViewById(R.id.layout_top);
+        TextView textView =  layout.findViewById(R.id.tv_options);
         textView.setText("查询设置");
     }
     private PowerManager powerManager = null;

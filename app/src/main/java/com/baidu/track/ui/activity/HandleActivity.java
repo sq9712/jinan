@@ -20,6 +20,7 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +45,7 @@ import com.baidu.track.R;
 import com.baidu.track.TrackApplication;
 import com.baidu.track.api.JSONParser;
 import com.baidu.track.model.CurrentLocation;
+import com.baidu.track.ui.view.ImageAdapter;
 import com.baidu.track.ui.view.PhotoAdapter;
 import com.baidu.track.utils.CommonUtil;
 import com.baidu.track.utils.camera.GifSizeFilter;
@@ -79,29 +83,28 @@ public class HandleActivity extends AppCompatActivity implements View.OnClickLis
     private Context mContext;
     private Button cancel,submit;
     private TextView username,nowTime,taskTitle,taskContent;
-    private ImageView headIv,btn1;
     private EditText content;
     private JSONArray imgString = new JSONArray();
-    private String id,subject,tagment,title,contentdetail,name;
+    private String id,subject,tagment,title,contentdetail,name,information,suggest;
     private Intent intent;
 
+    private RadioButton radioButton=null;
+    private RadioGroup nRg1;
+
     private JSONObject allObj = new JSONObject();
+    private ImageAdapter imageAdapter;
 
     /**
      * 添加三张图片
      */
-    private RecyclerView recyclerView;
+    private RecyclerView recyclerView,recyclerView1;
     private PhotoAdapter photoAdapter;
 
     private List<Uri> mUris=new ArrayList<>();
     private List<String> mPaths=new ArrayList<>();
     private static final int REQUEST_CODE_CHOOSE = 23;
 
-    //baidu 添加
-    private LBSTraceClient client = null;
-    private TrackApplication track =null;
-
-    private static final int REQUEST_CAPTURE = 2;  //拍照
+    private ArrayList<String> urlList  = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,32 +112,94 @@ public class HandleActivity extends AppCompatActivity implements View.OnClickLis
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_deal);
         mContext = this;
-        SharedPreferences sp=getSharedPreferences("loginInfo", MODE_PRIVATE);
-        name = sp.getString("loginUserName","");
-        //获取DetailsActivity传来的责任类型
-        Bundle bundle=getIntent().getExtras();
-        tagment = bundle.getString("tagname");
-        if(tagment.equals("TaskActivity")){
-            id=bundle.getString("id");
-            //标题，内容
-            title = bundle.getString("taskTitle");
-            contentdetail = bundle.getString("content");
-        }else{
-            title = bundle.getString("title");
-            contentdetail = bundle.getString("content");
-        }
-        subject=bundle.getString("subject");
-//        btn1 = findViewById(R.id.camera);
+
+        content = findViewById(R.id.result);
         cancel = findViewById(R.id.cancel_button);
         submit = findViewById(R.id.publish);
-        content = findViewById(R.id.result);
-        headIv = findViewById(R.id.image);
 
         username = findViewById(R.id.peplename);
         nowTime = findViewById(R.id.nowtime);
         taskTitle = findViewById(R.id.Title);
         taskContent = findViewById(R.id.Details);
 
+        nRg1 = findViewById(R.id.rg_1);
+        radioButton = findViewById(nRg1.getCheckedRadioButtonId());
+        nRg1.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                radioButton = radioGroup.findViewById(i);
+            }
+        });
+
+        SharedPreferences sp=getSharedPreferences("loginInfo", MODE_PRIVATE);
+        name = sp.getString("name","");
+        //获取DetailsActivity传来的责任类型
+        Bundle bundle=getIntent().getExtras();
+        tagment = bundle.getString("tagname");
+        recyclerView1 = findViewById(R.id.recyclerView1);
+
+        if(tagment.equals("TaskActivity")){
+            id=bundle.getString("id");
+            //标题，内容
+            title = bundle.getString("taskTitle");
+            contentdetail = bundle.getString("content");
+            information = bundle.getString("information");
+
+            //放到最外层
+            urlList = bundle.getStringArrayList("imgurls");
+            Log.i("urlList",String.valueOf(urlList));
+            Log.i("information",String.valueOf(information));
+            if (urlList.get(0).equals(BASE_URL+"null")){
+                //无操作
+            }else{
+                //显示图片
+                recyclerView1.setVisibility(View.VISIBLE);
+                recyclerView1.setLayoutManager(new GridLayoutManager(this, 3));
+                imageAdapter = new ImageAdapter(this, urlList);
+                recyclerView1.setAdapter(imageAdapter);
+            }
+            if(information.equals("null")){
+
+            }else{
+                //编辑框显示之前编辑的内容
+                content.setText(information);
+            }
+
+        }else if (tagment.equals("DealActivity")){
+            title = bundle.getString("title");
+            contentdetail = bundle.getString("content");
+        }else{
+            id=bundle.getString("id");
+            //标题，内容
+            title = bundle.getString("title");
+            contentdetail = bundle.getString("content");
+            information = bundle.getString("information");
+
+            //放到最外层
+            urlList = bundle.getStringArrayList("imgurls");
+            Log.i("urlList",String.valueOf(urlList));
+            Log.i("information",String.valueOf(information));
+            if (urlList.get(0).equals("https://www.vorin.netnull")){
+                //无操作
+            }else{
+                //显示图片
+                recyclerView1.setVisibility(View.VISIBLE);
+                recyclerView1.setLayoutManager(new GridLayoutManager(this, 3));
+                imageAdapter = new ImageAdapter(this, urlList);
+                recyclerView1.setAdapter(imageAdapter);
+            }
+            if(information.equals("null")){
+
+            }else{
+                //编辑框显示之前编辑的内容
+                content.setText(information);
+            }
+        }
+        subject=bundle.getString("subject");
+        if (subject.equals("0")){
+            nRg1.setVisibility(View.GONE);
+        }
+        taskContent.setMovementMethod(ScrollingMovementMethod.getInstance());
         SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");// HH:mm:ss
         // 获取当前时间
         Date date1 = new Date(System.currentTimeMillis());
@@ -145,18 +210,16 @@ public class HandleActivity extends AppCompatActivity implements View.OnClickLis
         taskTitle.setText(title);
         taskContent.setText(contentdetail);
 
-//        btn1.setOnClickListener(this);
         cancel.setOnClickListener(this);
         submit.setOnClickListener(this);
 
-        client = new LBSTraceClient(getApplicationContext());
-        track = (TrackApplication) getApplicationContext();
+
 
         /**
          * 添加三张图片
          */
         //设置RecyclerView
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        recyclerView =  findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
         photoAdapter = new PhotoAdapter(this, onAddPicListener);
         photoAdapter.setSelectMax(3);
@@ -196,6 +259,7 @@ public class HandleActivity extends AppCompatActivity implements View.OnClickLis
                                                 .thumbnailScale(0.85f)
                                                 .imageEngine(new GlideEngine())
                                                 .forResult(REQUEST_CODE_CHOOSE);
+
                                         break;
                                     case 1:
                                         // 删除图片
@@ -222,28 +286,9 @@ public class HandleActivity extends AppCompatActivity implements View.OnClickLis
         }
     };
 
-    private String mFilePath;
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-//            //相机拍摄
-//            case R.id.camera:
-//                // 获取SD卡路径
-//                mFilePath = Environment.getExternalStorageDirectory().getPath();
-//                // 保存图片的文件名
-//                mFilePath = mFilePath + "/" + System.currentTimeMillis()+".png";
-//                if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.N){
-//                    takePhotoBiggerThan7((new File(mFilePath)).getAbsolutePath());
-//                }else {
-//                    // 指定拍照意图
-//                    Intent openCameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//                    // 加载路径图片路径
-//                    Uri mUri = Uri.fromFile(new File(mFilePath));
-//                    // 指定存储路径，这样就可以保存原图了
-//                    openCameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, mUri);
-//                    startActivityForResult(openCameraIntent, REQUEST_CAPTURE);
-//                }
-//                break;
             case R.id.cancel_button :
                 if(tagment.equals("TaskActivity")) {
                     intent = new Intent(mContext, LookActivity.class);
@@ -255,61 +300,63 @@ public class HandleActivity extends AppCompatActivity implements View.OnClickLis
                 break;
             //将数据都提交到服务器
             case R.id.publish:
+
+                //单选框为处理中
+                if(radioButton.getText().equals("处理中")){
+                    subject = "2";
+                }else{
+                    subject = "1";
+                }
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");// HH:mm:ss
+                // 获取当前时间
+                Date date = new Date(System.currentTimeMillis());
+                suggest = content.getText()+simpleDateFormat.format(date)+";";
                 if(mPaths.size() == 0){
                     Toast.makeText(mContext, "请现场取证", Toast.LENGTH_SHORT).show();
                 }else{
                     JSONParser jsonParser = new JSONParser();
+                    try{
+                        for (int j=0;j<mPaths.size();j++){
+                            // 获取输入流
+                            is = new FileInputStream(mPaths.get(j));
+                            // 把流解析成bitmap,此时就得到了清晰的原图
+                            Bitmap bitmap = BitmapFactory.decodeStream(is);
+                            //对Bitmap对象进行压缩处理
+                            Bitmap bm = imageZoom(bitmap, 310.00);
+                            imgString.put(bitmapToBase64(bm));
+                        }
+                    }catch (FileNotFoundException e){
+                        e.printStackTrace();
+                    }
                     if(tagment.equals("TaskActivity")){
                         //上传12345派单过来处理的问题
                         try{
                             allObj.put("id", id);//任务编号
-                            allObj.put("suggest", content.getText());//处理意见
+                            allObj.put("suggest", suggest);//处理意见
                             allObj.put("result", subject);//责任类型
-                            allObj.put("img" , imgString);//拍摄好的图片
-
+                            allObj.put("img" , imgString);//拍摄好的图
                             jsonParser.post(allObj,BASE_URL+"/api/endMatter",jsonParser.getInfo(mContext));//将任务处理信息传入服务器
                         }catch (JSONException e){
                             e.printStackTrace();
                         }
                         startActivity(new Intent(this,LookActivity.class));
                         finish();
-                    }else {
-                        //上传百度鹰眼单个轨迹点
-                        LatLng lal = new LatLng();
-                        lal.setLatitude(CurrentLocation.latitude);
-                        lal.setLongitude(CurrentLocation.longitude);
-                        Point poi = new Point();
-                        poi.setLocation(lal);
-                        poi.setLocTime(CommonUtil.getCurrentTime());
-                        AddPointRequest Request = new AddPointRequest(10000, track.serviceId);
-                        Request.setPoint(poi);
-                        Request.setEntityName(track.entityName);
-                        client.addPoint(Request, new OnTrackListener() {
-                            @Override
-                            public void onAddPointCallback(AddPointResponse addPointResponse) {
-                                super.onAddPointCallback(addPointResponse);
-                                Log.d("回调结果", "打印中" + addPointResponse.toString());
-                            }
-
-                        });
+                    }else if(tagment.equals("DealActivity")){
                         String location = getLngAndLat(this);
-                        Log.i("经纬度",location);
                         List<String> list= Arrays.asList(location.split(","));
 
                         //上传巡查员发现的问题
                         try{
                             SharedPreferences sp=getSharedPreferences("loginInfo", MODE_PRIVATE);
-                            Log.i("sp中的id",sp.getString("track_id ",""));
                             allObj.put("id", sp.getString("track_id",""));//轨迹ID
                             allObj.put("title", title);//任务标题
                             allObj.put("content", contentdetail);//任务问题描述
                             //巡查员的实时位置
                             allObj.put("latitude", list.get(1));//纬度
                             allObj.put("longitude",  list.get(0));//经度
-                            allObj.put("suggest", content.getText());//处理意见
+                            allObj.put("suggest", suggest);//处理意见
                             allObj.put("result", subject);//责任类型
                             allObj.put("img" , imgString);//拍摄好的图片
-                            Log.i("allobj",String.valueOf(allObj));
 
                             jsonParser.post(allObj,BASE_URL+"/api/importMatter",jsonParser.getInfo(mContext));//将任务处理信息传入服务器
                            // startActivity(new Intent(this, StartAndEndActivity.class));
@@ -317,99 +364,44 @@ public class HandleActivity extends AppCompatActivity implements View.OnClickLis
                         }catch (JSONException e){
                             e.printStackTrace();
                          }
+                    }else{
+                        String location = getLngAndLat(this);
+                        List<String> list= Arrays.asList(location.split(","));
+                        //上传巡查员发现的问题
+                        try{
+                            allObj.put("id", id);//任务id
+                            allObj.put("title", title);//任务标题
+                            allObj.put("content", contentdetail);//任务问题描述
+                            //巡查员的实时位置
+                            allObj.put("latitude", list.get(1));//纬度
+                            allObj.put("longitude",  list.get(0));//经度
+                            allObj.put("suggest", suggest);//处理意见
+                            allObj.put("result", subject);//责任类型
+                            allObj.put("img" , imgString);//拍摄好的图片
+
+                            jsonParser.post(allObj,BASE_URL+"/api/importMatter",jsonParser.getInfo(mContext));//将任务处理信息传入服务器
+                            // startActivity(new Intent(this, StartAndEndActivity.class));
+                            finish();
+                        }catch (JSONException e){
+                            e.printStackTrace();
+                        }
                     }
                 }
                 break;
         }
     }
-
-//    private void takePhotoBiggerThan7(String absolutePath) {
-//        Uri mCameraTempUri;
-//        try {
-//            ContentValues values = new ContentValues(1);
-//            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpg");
-//            values.put(MediaStore.Images.Media.DATA, absolutePath);
-//            mCameraTempUri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-//            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION
-//                    | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-//            if (mCameraTempUri != null) {
-//                intent.putExtra(MediaStore.EXTRA_OUTPUT, mCameraTempUri);
-//                intent.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 1);
-//            }
-//            startActivityForResult(intent, REQUEST_CAPTURE);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-//
     private FileInputStream is;
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        switch (requestCode) {
-//            case REQUEST_CAPTURE://拍照
-//                try {
-//                    // 获取输入流
-//                    is = new FileInputStream(mFilePath);
-//                    // 把流解析成bitmap,此时就得到了清晰的原图
-//                    Bitmap bitmap = BitmapFactory.decodeStream(is);
-//                    //对Bitmap对象进行压缩处理
-//                   Bitmap bm = imageZoom(bitmap, 310.00);
-//                    //接下来就可以展示了（或者做上传处理）
-//                    headIv.setVisibility(View.VISIBLE);
-//                        cameraLay.setVisibility(View.GONE);
-//                        headIv.setImageBitmap(bitmap);
-//                    imgString = bitmapToBase64(bm);
-//                    Log.i("imgString",imgString);
-//                } catch (FileNotFoundException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                } finally {
-//                    // 关闭流
-//                    try {
-//                        is.close();
-//                    } catch (IOException e) {
-//                        // TODO Auto-generated catch block
-//                        e.printStackTrace();
-//                    }
-//                }
-//
-//        }
-//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_CHOOSE && resultCode == RESULT_OK) {
+
             for (int i=0;i<Matisse.obtainResult(data).size();i++){
                 mUris.add(Matisse.obtainResult(data).get(i));
                 mPaths.add(Matisse.obtainPathResult(data).get(i));
             }
-//            mUris=Matisse.obtainResult(data);
-//            mPaths=Matisse.obtainPathResult(data);
             photoAdapter.setData(mUris,mPaths);
-
-            try{
-                for (int j=0;j<mPaths.size();j++){
-                    // 获取输入流
-                    is = new FileInputStream(mPaths.get(j));
-                    // 把流解析成bitmap,此时就得到了清晰的原图
-                    Bitmap bitmap = BitmapFactory.decodeStream(is);
-                    imgString.put(bitmapToBase64(bitmap));
-                }
-
-            }catch (FileNotFoundException e){
-                e.printStackTrace();
-            } finally {
-                    // 关闭流
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
         }
     }
 

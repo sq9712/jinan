@@ -23,6 +23,7 @@
             android:id="@+id/buttontConten"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:background="@layout/rectangle"
             android:elevation="5dp"
             android:orientation="horizontal">
@@ -51,6 +52,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:singleLine="true"
+                    android:layout_marginBottom="5dp"
                     android:text="这是标题"
                     android:textSize="15sp" />
 
@@ -66,11 +68,13 @@
 
                 <TextView
                     android:id="@+id/Details"
-                    android:layout_width="match_parent"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
-                    android:singleLine="true"
+                    android:singleLine="false"
+                    android:maxLines="4"
                     android:text="有人乱丢垃圾"
+                    android:layout_marginBottom="5dp"
                     android:textSize="15sp" />
 
                 <TextView
@@ -88,6 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="10dp"
                     android:singleLine="true"
                     android:text="2019年8月26日16：00：00"
                     android:textSize="15sp" />
@@ -96,22 +101,15 @@
             </GridLayout>
         </LinearLayout>
 
-        <com.bm.library.PhotoView
-            android:id="@+id/img_read"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_below="@+id/buttontConten"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="11dp"
-            android:scaleType="center" />
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginLeft="15dp"
+            android:layout_below="@+id/buttontConten">
+        </android.support.v7.widget.RecyclerView>
 
     </RelativeLayout>
-    <com.bm.library.PhotoView
-        android:id="@+id/img2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/jktoolbar"
-        android:scaleType="centerCrop"
-        android:visibility="visible" />
 </RelativeLayout>
 

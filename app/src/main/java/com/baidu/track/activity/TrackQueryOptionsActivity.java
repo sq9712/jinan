@@ -3,6 +3,7 @@ package com.baidu.track.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -127,6 +128,8 @@ public class TrackQueryOptionsActivity extends BaseActivity
     }
 
     public void onFinish(View v) {
+        Log.i("时间",String.valueOf(startTime));
+        Log.i("时间",String.valueOf(endTime));
         result.putExtra("startTime", startTime);
         result.putExtra("endTime", endTime);
         result.putExtra("processed", isProcessed);

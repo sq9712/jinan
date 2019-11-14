@@ -19,7 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textColor="#1D1D1C"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:text="00：00：00"/>
         <TextView
             android:layout_gravity="center"
@@ -38,7 +38,7 @@
             android:id="@+id/endTime"
             android:layout_height="wrap_content"
             android:textColor="#1D1D1C"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:text="00：00：00"/>
 
 

@@ -79,15 +79,10 @@ public class LoginActivity extends AppCompatActivity {
         canbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(mContext, MainActivity.class);
-                startActivity(intent);
+                onBackPressed();
             }
         });
 
-
-        if(NetUtil.isNetworkAvailable(mContext)){
-            Toast.makeText(mContext,"请检查网络是否打开",Toast.LENGTH_LONG).show();
-        }
     }
 
     @OnClick(R.id.btnSignIn)
@@ -95,50 +90,55 @@ public class LoginActivity extends AppCompatActivity {
         userName = inputUsername.getText().toString();
         userPassword = inputPassword.getText().toString();
         String str = sendState(userName,userPassword);
-
-        // TextUtils.isEmpty
-        if(TextUtils.isEmpty(userName)){
-            Toast.makeText(LoginActivity.this, "请输入用户名", Toast.LENGTH_SHORT).show();
-            return;
-        }else if(TextUtils.isEmpty(userPassword)){
-            Toast.makeText(LoginActivity.this, "请输入密码", Toast.LENGTH_SHORT).show();
-            return;
-            //向接口提交用户信息获取返回信息
+        if(!NetUtil.isNetworkAvailable(mContext)){
+            Toast.makeText(mContext,"请检查网络是否打开",Toast.LENGTH_LONG).show();
         }else {
-            try{
-                JSONObject json = new JSONObject(str);
-                statu = json.optString("status");
-                datas = json.getString("data");
-                JSONObject object = new JSONObject(datas);
-                token = object.getString("access_token");
-                //获取用户名
-                user = object.getString("user");
-                JSONObject userJson = new JSONObject(user);
-                name = userJson.getString("name");
-            }catch (JSONException e) {
-                e.printStackTrace();
-            }
-            if(statu.equals("success")){
-                //一致登录成功
-                Toast.makeText(LoginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
-                //根据权限分配内容
+            // TextUtils.isEmpty
+            if(TextUtils.isEmpty(userName)){
+                Toast.makeText(LoginActivity.this, "请输入用户名", Toast.LENGTH_SHORT).show();
+                return;
+            }else if(TextUtils.isEmpty(userPassword)){
+                Toast.makeText(LoginActivity.this, "请输入密码", Toast.LENGTH_SHORT).show();
+                return;
+                //向接口提交用户信息获取返回信息
+            }else {
+                try{
+                    JSONObject json = new JSONObject(str);
+                    statu = json.optString("status");
+                    datas = json.getString("data");
+                    JSONObject object = new JSONObject(datas);
+                    token = object.getString("access_token");
+                    Log.i("access_token",token);
+                    //获取用户名
+                    user = object.getString("user");
+                    JSONObject userJson = new JSONObject(user);
+                    name = userJson.getString("name");
+                }catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                if(statu.equals("success")){
+                    //一致登录成功
+                    Toast.makeText(LoginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
+                    //根据权限分配内容
 
-                //保存登录状态，在界面保存登录的用户名 定义个方法 saveLoginStatus boolean 状态 , userName 用户名;
-                saveLoginStatus(true, userName,token,name);
-                //登录成功后关闭此页面进入主页
-                Intent data=new Intent();
-                data.putExtra("isLogin",true);
-                //RESULT_OK为Activity系统常量，状态码为-1
-                // 表示此页面下的内容操作成功将data返回到上一页面，如果是用back返回过去的则不存在用setResult传递data值
-                setResult(RESULT_OK,data);
-                //销毁登录界面
-                LoginActivity.this.finish();
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                return;
-            }else{
-                Toast.makeText(LoginActivity.this, "用户名或密码错误,请检查用户名或密码", Toast.LENGTH_SHORT).show();
-                JSONParser.changeStatu(mContext);
-                return;
+                    //保存登录状态，在界面保存登录的用户名 定义个方法 saveLoginStatus boolean 状态 , userName 用户名;
+                    saveLoginStatus(true, userName,token,name);
+                    //登录成功后关闭此页面进入主页
+                    Intent data=new Intent();
+                    data.putExtra("isLogin",true);
+                    //RESULT_OK为Activity系统常量，状态码为-1
+                    // 表示此页面下的内容操作成功将data返回到上一页面，如果是用back返回过去的则不存在用setResult传递data值
+                    setResult(RESULT_OK,data);
+                    //销毁登录界面
+                    LoginActivity.this.finish();
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    finish();
+                    return;
+                }else{
+                    Toast.makeText(LoginActivity.this, "用户名或密码错误,请检查用户名或密码", Toast.LENGTH_SHORT).show();
+                    JSONParser.changeStatu(mContext);
+                    return;
+                }
             }
         }
 

@@ -7,7 +7,9 @@
     <LinearLayout
         android:id="@+id/jktoolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        >
+
       <Button
           android:id="@+id/cancel_button"
           android:layout_width="wrap_content"
@@ -15,7 +17,8 @@
           android:text="取消"
           android:textSize="18dp"
           android:layout_weight="0.1"
-          android:background="@drawable/button_style"/>
+          android:textColor="@drawable/button_submit"
+          android:background="@null" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,9 +28,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="上报"
-            android:textSize="20dp"
+            android:textSize="18dp"
             android:layout_weight="0.1"
-            android:background="@drawable/button_style"/>
+            android:background="@null"
+            android:textColor="@drawable/button_submit"/>
     </LinearLayout>
 
 
@@ -43,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttontContentTitle"
             android:elevation="5dp"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:background="@layout/rectangle">
             <GridLayout
                 android:id="@+id/GridLayout1"
@@ -68,6 +72,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="5dp"
                     android:singleLine="true"
                     android:text="XX"
                     android:textSize="15sp" />
@@ -84,6 +89,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="5dp"
                     android:textSize="15sp"
                     android:singleLine="true"
                     android:text="XX"/>
@@ -101,6 +107,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="5dp"
                     android:textSize="15sp"
                     android:singleLine="true"
                     android:text="标题"/>
@@ -115,40 +122,47 @@
                     android:text="内容:"/>
                 <TextView
                     android:id="@+id/Details"
-                    android:layout_width="match_parent"
+                    android:layout_width="200dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
+                    android:layout_marginBottom="5dp"
                     android:textSize="15sp"
-                    android:singleLine="true"
+                    android:maxLines="4"
+                    android:singleLine="false"
                     android:text="有人乱丢垃圾"/>
-
-
-                <TextView
-                    android:id="@+id/txtPlace"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="12dp"
-                    android:textSize="15sp"
-                    android:singleLine="true"
-                    android:textColor="@color/activity_task_text"
-                    android:text="巡查地址:"/>
-                <TextView
-                    android:id="@+id/Place"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:textSize="15sp"
-                    android:singleLine="true"
-                    android:text="魏家庄111号"/>
-
             </GridLayout>
+            <RadioGroup
+                android:id="@+id/rg_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/Responsibility"
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/rb_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="完成"
+                    android:checked="true"
+                    android:textSize="16sp"
+                    android:textColor="#c50f57"
+                    />
+                <RadioButton
+                    android:id="@+id/rb_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="处理中"
+                    android:layout_below="@id/rb_1"
+                    android:textSize="16sp"
+                    android:textColor="#c50f57"
+                    />
+            </RadioGroup>
         </LinearLayout>
         <TextView
             android:id="@+id/explain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttontConten"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="8dp"
             android:textColor="@color/black"
             android:textSize="18dp"
@@ -156,12 +170,13 @@
         <EditText
             android:id="@+id/result"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="150dp"
             android:layout_below="@+id/explain"
             android:textSize="14sp"
             android:gravity="left|top"
             android:background="@layout/rectangle"
             />
+
         <TextView
             android:id="@+id/now_scene"
             android:layout_width="match_parent"
@@ -176,33 +191,27 @@
         <LinearLayout
             android:id="@+id/camera_layout"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_below="@+id/now_scene">
-            <!--android:background="@drawable/bg_border_stroke">-->
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/now_scene"
+            android:orientation="vertical">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView1"
+                android:layout_width="match_parent"
+                android:layout_height="120dp"
+                android:layout_marginLeft="10dp"
+                android:visibility="gone">
+            </android.support.v7.widget.RecyclerView>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recyclerView"
-                android:layout_marginTop="20dp"
+                android:layout_marginLeft="10dp"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/recyclerView1">
             </android.support.v7.widget.RecyclerView>
-
-            <!--<ImageView-->
-                <!--android:id="@+id/camera"-->
-                <!--android:layout_width="80dp"-->
-                <!--android:layout_height="80dp"-->
-                <!--android:layout_marginLeft="30dp"-->
-                <!--android:layout_gravity="center_vertical"-->
-                <!--android:src="@drawable/photo" />-->
 
 
         </LinearLayout>
-        <!--<ImageView-->
-            <!--android:id="@+id/image"-->
-            <!--android:layout_width="150dp"-->
-            <!--android:layout_height="150dp"-->
-            <!--android:layout_below="@+id/now_scene"-->
-            <!--android:visibility="gone"/>-->
 
 
     </RelativeLayout>

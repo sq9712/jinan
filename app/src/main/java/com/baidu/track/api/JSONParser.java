@@ -312,7 +312,6 @@ public class JSONParser {
                     result  = EntityUtils.toString(httpResponse.getEntity(), "GB2312");
                     Log.d("sanhui", "响应码： " + httpResponse.getStatusLine().getStatusCode()); //获取响应码
                     Log.i("result",result);
-
                     if(httpResponse.getStatusLine().getStatusCode()!= HttpStatus.SC_OK){
                         result="服务器异常";
                     }

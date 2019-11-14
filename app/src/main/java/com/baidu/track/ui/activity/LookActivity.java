@@ -9,6 +9,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -75,7 +76,11 @@ public class LookActivity extends AppCompatActivity implements SwipeRefreshLayou
                 bundle.putString("createTime", datas.get(position).getTime());
                 bundle.putString("lastTime", datas.get(position).getLastTime());
                 bundle.putString("address", datas.get(position).getAddress());
-                bundle.putString("tagname", "lessonfragment");
+                bundle.putString("information", datas.get(position).getInformation());
+                bundle.putStringArrayList("imgurls", datas.get(position).getImgUrl());
+                Log.i("information",datas.get(position).getInformation());
+                Log.i("imgurls",String.valueOf(datas.get(position).getImgUrl()));
+                bundle.putString("tagname", "LookActivity");
                 Intent intent = new Intent();
                 intent.putExtras(bundle);
                 intent.setClass(mContext, TaskActivity.class);
@@ -126,11 +131,11 @@ public class LookActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
     }
 
-    @Override
-    public void onBackPressed(){
-        startActivity(new Intent(this,MainActivity.class));
-        finish();
-    }
+//    @Override
+//    public void onBackPressed(){
+//        startActivity(new Intent(this,MainActivity.class));
+//        finish();
+//    }
 
     @Override
     public void onDestroy() {
